@@ -17,15 +17,15 @@ class CreateNodesTable extends Migration
             $table->bigInteger("id", false, true)->primary();
             $table->decimal("latitude", 13, 10);
             $table->decimal("longitude", 13, 10);
+            $table->bigInteger("changeset_id", false, true);
             $table->boolean("visible");
             $table->timestamp("timestamp");
-            $table->bigInteger("tile", false, true);
             $table->bigInteger("version", false, true);
+            $table->string("user", 255);
         });
 
         Schema::create('node_tags', function (Blueprint $table) {
-            $table->bigInteger("node_id", false, true)->primary()->nullable(false);
-            $table->bigInteger("version", false, true);
+            $table->bigInteger("node_id", false, true)->nullable(false);
             $table->string("k", 255);
             $table->string("v", 255);
             $table->foreign('node_id')->references('id')->on('nodes');

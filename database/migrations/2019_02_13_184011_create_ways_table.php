@@ -15,13 +15,15 @@ class CreateWaysTable extends Migration
     {
         Schema::create('ways', function (Blueprint $table) {
             $table->bigInteger("id", false, true)->primary();
+            $table->bigInteger("changeset_id", false, true);
             $table->boolean("visible");
             $table->timestamp("timestamp");
             $table->bigInteger("version", false, true);
+            $table->string("user", 255);
         });
 
         Schema::create('way_tags', function (Blueprint $table) {
-            $table->bigInteger("way_id", false, true)->primary()->nullable(false);
+            $table->bigInteger("way_id", false, true)->nullable(false);
             $table->bigInteger("version", false, true);
             $table->string("k", 255);
             $table->string("v", 255);

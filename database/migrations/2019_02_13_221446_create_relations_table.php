@@ -20,7 +20,7 @@ class CreateRelationsTable extends Migration
             $table->bigInteger("version", false, true);
         });
         Schema::create('relation_tags', function (Blueprint $table) {
-            $table->bigInteger("relation_id", false, true)->primary()->nullable(false);
+            $table->bigInteger("relation_id", false, true)->nullable(false);
             $table->bigInteger("version", false, true);
             $table->string("k", 255);
             $table->string("v", 255);
