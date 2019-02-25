@@ -15,7 +15,6 @@ $factory->define(App\Models\OSM\Node::class, function (Faker $faker) {
         'longitude' => $faker->longitude(),
         'visible' => "1",
         'timestamp' => $faker->dateTime('now', "America/Guayaquil"),
-        'tile' => "1",
         'version' => "1",
     ];
 });

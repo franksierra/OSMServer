@@ -24,7 +24,6 @@ class CreateWaysTable extends Migration
 
         Schema::create('way_tags', function (Blueprint $table) {
             $table->bigInteger("way_id", false, true)->nullable(false);
-            $table->bigInteger("version", false, true);
             $table->string("k", 255);
             $table->string("v", 255);
 
@@ -35,7 +34,6 @@ class CreateWaysTable extends Migration
         Schema::create('way_nodes', function (Blueprint $table) {
             $table->bigInteger("way_id", false, true);
             $table->bigInteger("node_id", false, true);
-            $table->bigInteger("version", false, true);
             $table->bigInteger("sequence");
 
             $table->foreign('way_id')->references('id')->on('ways');
