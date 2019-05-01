@@ -1,8 +1,11 @@
 <?php
 
-use App\Models\OSM\Node;
-use App\Models\OSM\NodeTag;
+use App\Models\App;
+use App\Models\AppKey;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,12 +16,28 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // $this->call(UsersTableSeeder::class);
+        // Users
+        $user = User::where('username', 'admin')->first();
+        $app = App::create([
+            'name' => 'TestKey',
+            'user_id' => $user->id,
+            'alias' => 'testkey',
+            'created_at' => Carbon::now()
+        ]);
+        $app_key = AppKey::create([
+            'app_id' => $user->id,
+            'platform' => 'other',
+            'key' => 'testkey123456',
+            'active' => 1,
+            'created_at' => Carbon::now()
+        ]);
+
         $nodes = factory(Node::class)->times(100)->create()
             ->each(function (Node $node) {
                 $node->tags()->saveMany(
                     factory(NodeTag::class, 10)->make()
                 );
             });
+
     }
 }
