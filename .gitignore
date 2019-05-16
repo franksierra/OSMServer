@@ -2,8 +2,9 @@
 /.idea/*
 
 ### Laravel template
-/vendor/
-/node_modules/
+vendor/
+packages/
+node_modules/
 npm-debug.log
 yarn-error.log
 

@@ -11,26 +11,50 @@ namespace App\Models\OSM;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Models\OSM\Node
+ *
+ * @property int $id
+ * @property float $latitude
+ * @property float $longitude
+ * @property int $changeset_id
+ * @property int $visible
+ * @property string $timestamp
+ * @property int $version
+ * @property string $user
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\NodeTag[] $tags
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node whereChangesetId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node whereLatitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node whereLongitude($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node whereTimestamp($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node whereUser($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node whereVersion($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node whereVisible($value)
+ * @mixin \Eloquent
+ */
 class Node extends Model
 {
     public $incrementing = false;
     public $timestamps = false;
 
+    protected $fillable = [
+        'id',
+        'latitude',
+        'longitude',
+        'changeset_id',
+        'visible',
+        'timestamp',
+        'version',
+        'user'
+    ];
 
     public function tags()
     {
         return $this->hasMany(NodeTag::class);
     }
-
-    public function ways()
-    {
-        return $this->hasManyThrough(WayNode::class, Way::class);
-    }
-
-    public function way_nodes()
-    {
-        return $this->hasMany(WayNode::class);
-    }
-
 
 }

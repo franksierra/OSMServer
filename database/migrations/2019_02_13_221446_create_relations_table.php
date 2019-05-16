@@ -21,12 +21,15 @@ class CreateRelationsTable extends Migration
             $table->bigInteger("version", false, true);
             $table->string("user", 255);
         });
+
         Schema::create('relation_tags', function (Blueprint $table) {
             $table->bigInteger("relation_id", false, true)->nullable(false);
             $table->string("k", 255);
             $table->string("v", 255);
 
-            $table->foreign('relation_id')->references('id')->on('relations');
+//            $table->foreign('relation_id')->references('id')->on('relations');
+
+//            $table->unique(['relation_id', 'k', 'v']);
         });
 
         Schema::create('relation_members', function (Blueprint $table) {
@@ -36,7 +39,9 @@ class CreateRelationsTable extends Migration
             $table->string("member_role", 255);
             $table->bigInteger("sequence");
 
-            $table->foreign('relation_id')->references('id')->on('relations');
+//            $table->foreign('relation_id')->references('id')->on('relations');
+
+//            $table->unique(['relation_id', 'member_type', 'member_id', 'member_role'],'unique_relations');
         });
 
 

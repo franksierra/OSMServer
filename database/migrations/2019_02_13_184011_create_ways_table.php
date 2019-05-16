@@ -27,7 +27,9 @@ class CreateWaysTable extends Migration
             $table->string("k", 255);
             $table->string("v", 255);
 
-            $table->foreign('way_id')->references('id')->on('ways');
+//            $table->foreign('way_id')->references('id')->on('ways');
+
+//            $table->unique(['way_id', 'k', 'v'],'unique_tags');
         });
 
 
@@ -36,8 +38,10 @@ class CreateWaysTable extends Migration
             $table->bigInteger("node_id", false, true);
             $table->bigInteger("sequence");
 
-            $table->foreign('way_id')->references('id')->on('ways');
-            $table->foreign('node_id')->references('id')->on('nodes');
+//            $table->foreign('way_id')->references('id')->on('ways');
+//            $table->foreign('node_id')->references('id')->on('nodes');
+
+//            $table->unique(['way_id', 'node_id'], 'unique_nodes');
         });
     }
 

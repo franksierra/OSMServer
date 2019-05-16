@@ -28,7 +28,10 @@ class CreateNodesTable extends Migration
             $table->bigInteger("node_id", false, true)->nullable(false);
             $table->string("k", 255);
             $table->string("v", 255);
-            $table->foreign('node_id')->references('id')->on('nodes');
+
+//            $table->foreign('node_id')->references('id')->on('nodes');
+
+//            $table->unique(['node_id', 'k', 'v'],'unique_tags');
         });
     }
 

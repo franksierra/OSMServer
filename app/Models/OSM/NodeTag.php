@@ -11,9 +11,30 @@ namespace App\Models\OSM;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Models\OSM\NodeTag
+ *
+ * @property int $node_id
+ * @property string $k
+ * @property string $v
+ * @property-read \App\Models\OSM\Node $node
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\NodeTag newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\NodeTag newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\NodeTag query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\NodeTag whereK($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\NodeTag whereNodeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\NodeTag whereV($value)
+ * @mixin \Eloquent
+ */
 class NodeTag extends Model
 {
     public $timestamps = false;
+
+    protected $fillable = [
+        'node_id',
+        'k',
+        'v'
+    ];
 
     public function node()
     {
