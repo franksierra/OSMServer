@@ -3,21 +3,26 @@
 namespace App\Console\Commands;
 
 use App\Models\OSM\Node;
+use App\Models\OSM\NodeTag;
 use App\Models\OSM\Relation;
+use App\Models\OSM\RelationMember;
+use App\Models\OSM\RelationTag;
 use App\Models\OSM\Way;
+use App\Models\OSM\WayNode;
+use App\Models\OSM\WayTag;
 use Illuminate\Console\Command;
 
 use Illuminate\Support\Facades\Storage;
 use OSMPBF\OSMReader;
 
-class ImportOSM extends Command
+class OsmImport extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'import:osm {filename}';
+    protected $signature = 'osm:import {filename}';
 
     /**
      * The console command description.
@@ -62,7 +67,7 @@ class ImportOSM extends Command
          * If you need to, you can skip on some blocks...
          * By specifying a block index
          */
-        $index = 0;
+        $index = 852;
         $pbfreader->skipToBlock(0);
         while ($data = $pbfreader->next()) {
             $reader = $pbfreader->getReader();
@@ -80,6 +85,12 @@ class ImportOSM extends Command
     private function processElements($elements)
     {
         $type = $elements['type'];
+
+        $records = [];
+        $tags = [];
+        $nodes = [];
+        $relations = [];
+
         foreach ($elements['data'] as $element) {
             $insert_element = [
                 'id' => $element['id'],
@@ -98,27 +109,25 @@ class ImportOSM extends Command
                 $insert_element["timestamp"] = str_replace("T", " ", $element["timestamp"]);
                 $insert_element["timestamp"] = str_replace("Z", "", $element["timestamp"]);
             }
+            $records[] = $insert_element;
 
-            /** @var Node|Way|Relation $elementObjName */
-            $elementObjName = "App\\Models\\OSM\\" . ucfirst($type);
-            $elementObj = $elementObjName::create($insert_element);
             foreach ($element["tags"] as $tag) {
                 $insert_tag = [
                     $type . "_id" => $element["id"],
                     "k" => $tag["key"],
                     "v" => $tag["value"]
                 ];
-                $elementObj->tags()->create($insert_tag);
+                $tags[] = $insert_tag;
             }
-
             foreach ($element["nodes"] as $node) {
                 $insert_node = [
                     $type . "_id" => $element["id"],
                     "node_id" => $node["id"],
                     "sequence" => $node["sequence"]
                 ];
-                $elementObj->nodes()->create($insert_node);
+                $nodes[] = $insert_node;
             }
+
             foreach ($element["relations"] as $relation) {
                 $insert_relation = [
                     $type . "_id" => $element["id"],
@@ -127,10 +136,35 @@ class ImportOSM extends Command
                     "member_role" => $relation["member_role"],
                     "sequence" => $relation["sequence"]
                 ];
-                $elementObj->members()->create($insert_relation);
+                $relations[] = $insert_relation;
             }
-
         }
+        $chunk_size = 2000;
+
+        /** @var Node|Way|Relation $elementObjName */
+        $elementObjName = "App\\Models\\OSM\\" . ucfirst($type);
+        $records = array_chunk($records, $chunk_size);
+        foreach ($records as $chunk) {
+            $elementObjName::insert($chunk);
+        }
+
+        /** @var NodeTag|WayTag|RelationTag $elementTagName */
+        $elementTagName = "App\\Models\\OSM\\" . ucfirst($type) . "Tag";
+        $tags = array_chunk($tags, $chunk_size);
+        foreach ($tags as $chunk) {
+            $elementTagName::insert($chunk);
+        }
+
+        $nodes = array_chunk($nodes, $chunk_size);
+        foreach ($nodes as $chunk) {
+            WayNode::insert($chunk);
+        }
+
+        $relations = array_chunk($relations, $chunk_size);
+        foreach ($relations as $chunk) {
+            RelationMember::insert($chunk);
+        }
+
     }
 
 }
