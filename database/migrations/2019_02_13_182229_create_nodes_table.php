@@ -21,6 +21,7 @@ class CreateNodesTable extends Migration
             $table->boolean("visible");
             $table->timestamp("timestamp");
             $table->bigInteger("version", false, true);
+            $table->bigInteger("uid", false, true);
             $table->string("user", 255);
         });
 
