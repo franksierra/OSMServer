@@ -14,6 +14,7 @@ class CreateWaysTable extends Migration
     public function up()
     {
         Schema::create('ways', function (Blueprint $table) {
+            $table->engine = 'MyISAM';
             $table->bigInteger("id", false, true)->primary();
             $table->bigInteger("changeset_id", false, true);
             $table->boolean("visible");
@@ -24,24 +25,24 @@ class CreateWaysTable extends Migration
         });
 
         Schema::create('way_tags', function (Blueprint $table) {
+            $table->engine = 'MyISAM';
             $table->bigInteger("way_id", false, true)->nullable(false);
             $table->string("k", 255);
             $table->string("v", 255);
 
 //            $table->foreign('way_id')->references('id')->on('ways');
-
 //            $table->unique(['way_id', 'k', 'v'],'unique_tags');
         });
 
 
         Schema::create('way_nodes', function (Blueprint $table) {
+            $table->engine = 'MyISAM';
             $table->bigInteger("way_id", false, true);
             $table->bigInteger("node_id", false, true);
             $table->bigInteger("sequence");
 
 //            $table->foreign('way_id')->references('id')->on('ways');
 //            $table->foreign('node_id')->references('id')->on('nodes');
-
 //            $table->unique(['way_id', 'node_id'], 'unique_nodes');
         });
     }
