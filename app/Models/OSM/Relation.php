@@ -19,19 +19,21 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $visible
  * @property string $timestamp
  * @property int $version
+ * @property int $uid
  * @property string $user
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\RelationMember[] $members
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\RelationTag[] $tags
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Relation newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Relation newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Relation query()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Relation whereChangesetId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Relation whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Relation whereTimestamp($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Relation whereUid($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Relation whereUser($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Relation whereVersion($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Relation whereVisible($value)
  * @mixin \Eloquent
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\RelationTag[] $tags
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\RelationMember[] $members
  */
 class Relation extends Model
 {

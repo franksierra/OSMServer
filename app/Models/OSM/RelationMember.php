@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $member_id
  * @property string $member_role
  * @property int $sequence
- * @property-read \App\Models\OSM\Node $node
+ * @property-read \App\Models\OSM\Relation $relation
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\RelationMember newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\RelationMember newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\RelationMember query()
@@ -29,7 +29,6 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\RelationMember whereRelationId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\RelationMember whereSequence($value)
  * @mixin \Eloquent
- * @property-read \App\Models\OSM\Relation $relation
  */
 class RelationMember extends Model
 {

@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $visible
  * @property string $timestamp
  * @property int $version
+ * @property int $uid
  * @property string $user
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\WayNode[] $nodes
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\WayTag[] $tags
@@ -28,6 +29,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Way whereChangesetId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Way whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Way whereTimestamp($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Way whereUid($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Way whereUser($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Way whereVersion($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Way whereVisible($value)

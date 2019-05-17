@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $visible
  * @property string $timestamp
  * @property int $version
+ * @property int $uid
  * @property string $user
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\NodeTag[] $tags
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node newModelQuery()
@@ -31,6 +32,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node whereLatitude($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node whereLongitude($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node whereTimestamp($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node whereUid($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node whereUser($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node whereVersion($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node whereVisible($value)

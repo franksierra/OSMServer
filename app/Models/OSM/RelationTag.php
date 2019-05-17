@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $relation_id
  * @property string $k
  * @property string $v
- * @property-read \App\Models\OSM\Node $node
+ * @property-read \App\Models\OSM\Relation $relation
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\RelationTag newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\RelationTag newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\RelationTag query()
@@ -25,7 +25,6 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\RelationTag whereRelationId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\RelationTag whereV($value)
  * @mixin \Eloquent
- * @property-read \App\Models\OSM\Relation $relation
  */
 class RelationTag extends Model
 {
