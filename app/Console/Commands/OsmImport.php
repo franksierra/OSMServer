@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\OSM\Node;
 use App\Models\OSM\NodeTag;
+use App\Models\OSM\OsmSettings;
 use App\Models\OSM\Relation;
 use App\Models\OSM\RelationMember;
 use App\Models\OSM\RelationTag;
@@ -44,9 +45,6 @@ class OsmImport extends Command
     public function __construct()
     {
         parent::__construct();
-        Storage::disk('local')->makeDirectory($this->inputfolder);
-        Storage::disk('local')->makeDirectory($this->outputfolder);
-        $this->storagePath = Storage::disk('local')->getDriver()->getAdapter()->getPathPrefix();
     }
 
     /**
@@ -56,11 +54,15 @@ class OsmImport extends Command
      */
     public function handle()
     {
+        Storage::disk('local')->makeDirectory($this->inputfolder);
+        Storage::disk('local')->makeDirectory($this->outputfolder);
+        $this->storagePath = Storage::disk('local')->getDriver()->getAdapter()->getPathPrefix();
+
         $start_time = time();
         $filename = $this->argument('filename');
         $full_file_name = $this->storagePath . $this->inputfolder . $filename;
         if (!Storage::disk('local')->exists($this->inputfolder . $filename)) {
-            $this->error('The file ' . $full_file_name . "does not exist!");
+            $this->error('The file ' . $full_file_name . " does not exist!");
             return false;
         };
         $this->outputhandlers = [
@@ -87,7 +89,26 @@ class OsmImport extends Command
         $pbfreader = new OSMReader($file_handler);
 
         $file_header = $pbfreader->readFileHeader();
+        $bbox_left = 0.000000001 * $file_header->getBbox()->getLeft();
+        $bbox_bottom = 0.000000001 * $file_header->getBbox()->getBottom();
+        $bbox_right = 0.000000001 * $file_header->getBbox()->getRight();
+        $bbox_top = 0.000000001 * $file_header->getBbox()->getTop();
+
+        $replication_timestamp = $file_header->getOsmosisReplicationTimestamp();
+        $replication_sequence = $file_header->getOsmosisReplicationSequenceNumber();
         $replication_url = $file_header->getOsmosisReplicationBaseUrl();
+
+        OsmSettings::create([
+            'country' => "*",
+            'bbox_left' => $bbox_left,
+            'bbox_bottom' => $bbox_bottom,
+            'bbox_right' => $bbox_right,
+            'bbox_top' => $bbox_top,
+            'replication_timestamp' => $replication_timestamp,
+            'replication_sequence' => $replication_sequence,
+            'replication_url' => $replication_url
+        ]);
+
 
         /**
          * If you need to, you can skip on some blocks...
