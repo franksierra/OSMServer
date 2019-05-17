@@ -31,6 +31,11 @@ class OsmImport extends Command
      */
     protected $description = 'Imports an OSM file into the database';
 
+    private $storagePath = '';
+    private $inputfolder = 'OsmImport/';
+    private $outputfolder = 'OsmExport/';
+    private $outputhandlers = [];
+
     /**
      * Create a new command instance.
      *
@@ -39,7 +44,9 @@ class OsmImport extends Command
     public function __construct()
     {
         parent::__construct();
-        Storage::disk('local')->makeDirectory('importOSM/');
+        Storage::disk('local')->makeDirectory($this->inputfolder);
+        Storage::disk('local')->makeDirectory($this->outputfolder);
+        $this->storagePath = Storage::disk('local')->getDriver()->getAdapter()->getPathPrefix();
     }
 
     /**
@@ -49,14 +56,33 @@ class OsmImport extends Command
      */
     public function handle()
     {
-        $storagePath = Storage::disk('local')->getDriver()->getAdapter()->getPathPrefix();
+        $start_time = time();
         $filename = $this->argument('filename');
-        if (!Storage::disk('local')->exists('importOSM/' . $filename)) {
-            $this->error('The file ' . $storagePath . 'importOSM/' . $filename . "does not exist!");
+        $full_file_name = $this->storagePath . $this->inputfolder . $filename;
+        if (!Storage::disk('local')->exists($this->inputfolder . $filename)) {
+            $this->error('The file ' . $full_file_name . "does not exist!");
             return false;
         };
-        $full_file_name = $storagePath . 'importOSM/' . $filename;
-
+        $this->outputhandlers = [
+            "nodes" => null,
+            "node_tags" => null,
+            "ways" => null,
+            "way_tags" => null,
+            "way_nodes" => null,
+            "relations" => null,
+            "relation_tags" => null,
+            "relation_members" => null,
+        ];
+        foreach ($this->outputhandlers as $entity => &$handler) {
+            $filename = $this->storagePath . $this->outputfolder . "insert_" . $entity . ".sql";
+            if (is_file($filename)) {
+                unlink($filename);
+            }
+            $handler = fopen($filename, "a+");
+            if (!$handler) {
+                die();
+            }
+        }
         $file_handler = fopen($full_file_name, "rb");
         $pbfreader = new OSMReader($file_handler);
 
@@ -67,22 +93,24 @@ class OsmImport extends Command
          * If you need to, you can skip on some blocks...
          * By specifying a block index
          */
-        $index = 852;
-        $pbfreader->skipToBlock(0);
+        $index = 0;
+        $pbfreader->skipToBlock($index);
         while ($data = $pbfreader->next()) {
             $reader = $pbfreader->getReader();
             $current = $reader->getPosition();
             $total = $reader->getEofPosition();
-            echo $index . " - " . $current . "/" . $total . "\t" . round(($current / $total) * 100, 2) . "% ->";
+            echo $index . " - " . $current . "/" . $total . "\t" . round(($current / $total) * 100, 2) . "% -> " . (time() - $start_time);
             $index++;
             $elements = $pbfreader->getElements();
             $this->processElements($elements);
-            echo "done\n";
+            echo " done\n";
         }
+        $end_time = time();
+        echo "This process took " . ($end_time - $start_time) . " seconds";
         return true;
     }
 
-    private function processElements($elements)
+    private function processElements($elements, $to = 'file')
     {
         $type = $elements['type'];
 
@@ -139,32 +167,79 @@ class OsmImport extends Command
                 $relations[] = $insert_relation;
             }
         }
-        $chunk_size = 2000;
-
         /** @var Node|Way|Relation $elementObjName */
         $elementObjName = "App\\Models\\OSM\\" . ucfirst($type);
-        $records = array_chunk($records, $chunk_size);
-        foreach ($records as $chunk) {
-            $elementObjName::insert($chunk);
-        }
-
         /** @var NodeTag|WayTag|RelationTag $elementTagName */
         $elementTagName = "App\\Models\\OSM\\" . ucfirst($type) . "Tag";
-        $tags = array_chunk($tags, $chunk_size);
+        if ($to != 'file') {
+            $chunk_size = 2000;
+            $records = array_chunk($records, $chunk_size);
+            $tags = array_chunk($tags, $chunk_size);
+            $nodes = array_chunk($nodes, $chunk_size);
+            $relations = array_chunk($relations, $chunk_size);
+        }
+
+        foreach ($records as $chunk) {
+            if ($to != 'file') {
+                $elementObjName::insert($chunk);
+            } else {
+                fwrite($this->outputhandlers[$type . "s"], $this->format_output($type, 's', $chunk));
+            }
+        }
+
         foreach ($tags as $chunk) {
-            $elementTagName::insert($chunk);
+            if ($to != 'file') {
+                $elementTagName::insert($chunk);
+            } else {
+                fwrite($this->outputhandlers[$type . "_tags"], $this->format_output($type, '_tags', $chunk));
+            }
         }
 
-        $nodes = array_chunk($nodes, $chunk_size);
         foreach ($nodes as $chunk) {
-            WayNode::insert($chunk);
+            if ($to != 'file') {
+                WayNode::insert($chunk);
+            } else {
+                fwrite($this->outputhandlers[$type . "_nodes"], $this->format_output($type, '_nodes', $chunk));
+            }
         }
 
-        $relations = array_chunk($relations, $chunk_size);
         foreach ($relations as $chunk) {
-            RelationMember::insert($chunk);
+            if ($to != 'file') {
+                RelationMember::insert($chunk);
+            } else {
+                fwrite($this->outputhandlers[$type . "_members"], $this->format_output($type, '_members', $chunk));
+            }
         }
 
     }
 
+    private function format_output($entity, $entity_sufix, $insert_data, $format = 'full_sql')
+    {
+        $table = $entity . $entity_sufix;
+        $escaped_keys = array_map(array($this, 'escape'), array_keys($insert_data));
+        $escaped_values = array_map(array($this, 'escape'), array_values($insert_data));
+
+        $return_string = "";
+        switch ($format) {
+            case 'csv':
+                $values = "'" . implode("'; '", $escaped_values) . "'";
+                $return_string = $values . "\n";
+                break;
+            case 'sql':
+                $values = "'" . implode("', '", $escaped_values) . "'";
+                $return_string = "INSERT INTO " . $table . " VALUES ($values);\n";
+                break;
+            case "full_sql":
+                $keys = implode(", ", $escaped_keys);
+                $values = "'" . implode("', '", $escaped_values) . "'";
+                $return_string = "INSERT INTO " . $table . " ($keys) VALUES ($values);\n";
+                break;
+        }
+        return $return_string;
+    }
+
+    private function escape($string)
+    {
+        return preg_replace('~[\x00\x0A\x0D\x1A\x22\x27\x5C]~u', '\\\$0', $string);
+    }
 }
