@@ -14,7 +14,7 @@ class CreateOsmSettingsTable extends Migration
     public function up()
     {
         Schema::create('osm_settings', function (Blueprint $table) {
-            $table->bigInteger("id")->primary();
+            $table->bigInteger("id", true);
             $table->string("country");
 
             $table->decimal("bbox_left", 13, 10);
