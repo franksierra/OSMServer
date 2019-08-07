@@ -21,17 +21,16 @@ class CreateRelationsTable extends Migration
             $table->timestamp("timestamp");
             $table->bigInteger("version", false, true);
             $table->bigInteger("uid", false, true);
-            $table->string("user", 255);
+            $table->string("user");
         });
 
         Schema::create('relation_tags', function (Blueprint $table) {
             $table->engine = 'MyISAM';
             $table->bigInteger("relation_id", false, true)->nullable(false);
-            $table->string("k", 255);
-            $table->string("v", 255);
+            $table->string("k", 191);
+            $table->string("v");
 
-//            $table->foreign('relation_id')->references('id')->on('relations');
-//            $table->unique(['relation_id', 'k', 'v']);
+            $table->unique(['relation_id', 'k']);
         });
 
         Schema::create('relation_members', function (Blueprint $table) {
@@ -39,11 +38,10 @@ class CreateRelationsTable extends Migration
             $table->bigInteger("relation_id", false, true);
             $table->enum("member_type", ["node", "way", "relation"]);
             $table->bigInteger("member_id", false, true);
-            $table->string("member_role", 255);
+            $table->string("member_role",191);
             $table->bigInteger("sequence");
 
-//            $table->foreign('relation_id')->references('id')->on('relations');
-//            $table->unique(['relation_id', 'member_type', 'member_id', 'member_role'],'unique_relations');
+            $table->unique(['relation_id', 'member_type', 'member_id', 'member_role'], 'unique_relations');
         });
 
 
