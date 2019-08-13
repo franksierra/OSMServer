@@ -19,7 +19,7 @@ class CreateRequestLogsTable extends Migration
             $table->unsignedBigInteger('app_id')->nullable();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->string('method', 15);
-            $table->string('uri', 255);
+            $table->string('uri');
             $table->longText('headers');
             $table->longText('params');
             $table->ipAddress('ip');

@@ -23,17 +23,14 @@ class CreateNodesTable extends Migration
             $table->timestamp("timestamp");
             $table->bigInteger("version", false, true);
             $table->bigInteger("uid", false, true);
-            $table->string("user", 255);
+            $table->string("user");
         });
 
         Schema::create('node_tags', function (Blueprint $table) {
             $table->engine = 'MyISAM';
             $table->bigInteger("node_id", false, true)->nullable(false);
-            $table->string("k", 255);
-            $table->string("v", 255);
-
-//            $table->foreign('node_id')->references('id')->on('nodes');
-//            $table->unique(['node_id', 'k', 'v'],'unique_tags');
+            $table->string("k");
+            $table->string("v");
         });
     }
 
@@ -44,9 +41,6 @@ class CreateNodesTable extends Migration
      */
     public function down()
     {
-        Schema::table('node_tags', function (Blueprint $table) {
-            $table->dropForeign(['node_id']);
-        });
         Schema::dropIfExists('node_tags');
         Schema::dropIfExists('nodes');
     }

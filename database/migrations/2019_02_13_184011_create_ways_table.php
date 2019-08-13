@@ -21,17 +21,14 @@ class CreateWaysTable extends Migration
             $table->timestamp("timestamp");
             $table->bigInteger("version", false, true);
             $table->bigInteger("uid", false, true);
-            $table->string("user", 255);
+            $table->string("user");
         });
 
         Schema::create('way_tags', function (Blueprint $table) {
             $table->engine = 'MyISAM';
             $table->bigInteger("way_id", false, true)->nullable(false);
-            $table->string("k", 255);
-            $table->string("v", 255);
-
-//            $table->foreign('way_id')->references('id')->on('ways');
-//            $table->unique(['way_id', 'k', 'v'],'unique_tags');
+            $table->string("k");
+            $table->string("v");
         });
 
 
@@ -40,10 +37,6 @@ class CreateWaysTable extends Migration
             $table->bigInteger("way_id", false, true);
             $table->bigInteger("node_id", false, true);
             $table->bigInteger("sequence");
-
-//            $table->foreign('way_id')->references('id')->on('ways');
-//            $table->foreign('node_id')->references('id')->on('nodes');
-//            $table->unique(['way_id', 'node_id'], 'unique_nodes');
         });
     }
 
@@ -54,15 +47,7 @@ class CreateWaysTable extends Migration
      */
     public function down()
     {
-
-        Schema::table('way_nodes', function (Blueprint $table) {
-            $table->dropForeign(['way_id']);
-            $table->dropForeign(['node_id']);
-        });
         Schema::dropIfExists('way_nodes');
-        Schema::table('way_tags', function (Blueprint $table) {
-            $table->dropForeign(['way_id']);
-        });
         Schema::dropIfExists('way_tags');
         Schema::dropIfExists('ways');
     }
