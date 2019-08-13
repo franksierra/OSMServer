@@ -67,31 +67,28 @@ class ProcessElements implements ShouldQueue
             $records[] = $insert_element;
 
             foreach ($element["tags"] as $tag) {
-                $insert_tag = [
+                $tags[] = [
                     $type . "_id" => $element["id"],
                     "k" => $tag["key"],
                     "v" => $tag["value"]
                 ];
-                $tags[] = $insert_tag;
             }
             foreach ($element["nodes"] as $node) {
-                $insert_node = [
+                $nodes[] = [
                     $type . "_id" => $element["id"],
                     "node_id" => $node["id"],
                     "sequence" => $node["sequence"]
                 ];
-                $nodes[] = $insert_node;
             }
 
             foreach ($element["relations"] as $relation) {
-                $insert_relation = [
+                $relations[] = [
                     $type . "_id" => $element["id"],
                     "member_type" => $relation["member_type"],
                     "member_id" => $relation["member_id"],
                     "member_role" => $relation["member_role"],
                     "sequence" => $relation["sequence"]
                 ];
-                $relations[] = $insert_relation;
             }
         }
         /** @var Node|Way|Relation $elementObjName */
@@ -100,24 +97,19 @@ class ProcessElements implements ShouldQueue
         $elementTagName = "App\\Models\\OSM\\" . ucfirst($type) . "Tag";
 
         $chunk_size = 6550;
-        $records = array_chunk($records, $chunk_size);
-        $tags = array_chunk($tags, $chunk_size);
-        $nodes = array_chunk($nodes, $chunk_size);
-        $relations = array_chunk($relations, $chunk_size);
-
-        foreach ($records as $chunk) {
+        foreach (array_chunk($records, $chunk_size) as $chunk) {
             $elementObjName::insert($chunk);
         }
 
-        foreach ($tags as $chunk) {
+        foreach (array_chunk($tags, $chunk_size) as $chunk) {
             $elementTagName::insert($chunk);
         }
 
-        foreach ($nodes as $chunk) {
+        foreach (array_chunk($nodes, $chunk_size) as $chunk) {
             WayNode::insert($chunk);
         }
 
-        foreach ($relations as $chunk) {
+        foreach (array_chunk($relations, $chunk_size) as $chunk) {
             RelationMember::insert($chunk);
         }
     }

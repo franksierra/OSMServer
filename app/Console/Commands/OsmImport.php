@@ -92,13 +92,13 @@ class OsmImport extends Command
 //        ]);
         $reader = $pbfreader->getReader();
 
+
         $total = $reader->getEofPosition();
         $this->output->progressStart($total);
         $last_position = 0;
         while ($data = $pbfreader->next()) {
             $current = $reader->getPosition();
             $this->output->progressAdvance($current - $last_position);
-
             $elements = $pbfreader->getElements();
             dispatch(new ProcessElements($elements));
             $last_position = $current;
@@ -108,4 +108,5 @@ class OsmImport extends Command
         echo "This process took " . ($end_time - $start_time) . " seconds";
         return true;
     }
+
 }

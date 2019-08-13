@@ -29,10 +29,8 @@ class CreateNodesTable extends Migration
         Schema::create('node_tags', function (Blueprint $table) {
             $table->engine = 'MyISAM';
             $table->bigInteger("node_id", false, true)->nullable(false);
-            $table->string("k", 191);
+            $table->string("k");
             $table->string("v");
-
-            $table->unique(['node_id', 'k']);
         });
     }
 

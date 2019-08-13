@@ -27,10 +27,8 @@ class CreateRelationsTable extends Migration
         Schema::create('relation_tags', function (Blueprint $table) {
             $table->engine = 'MyISAM';
             $table->bigInteger("relation_id", false, true)->nullable(false);
-            $table->string("k", 191);
+            $table->string("k");
             $table->string("v");
-
-            $table->unique(['relation_id', 'k']);
         });
 
         Schema::create('relation_members', function (Blueprint $table) {
@@ -38,10 +36,8 @@ class CreateRelationsTable extends Migration
             $table->bigInteger("relation_id", false, true);
             $table->enum("member_type", ["node", "way", "relation"]);
             $table->bigInteger("member_id", false, true);
-            $table->string("member_role",191);
+            $table->string("member_role");
             $table->bigInteger("sequence");
-
-            $table->unique(['relation_id', 'member_type', 'member_id', 'member_role'], 'unique_relations');
         });
 
 
@@ -54,16 +50,8 @@ class CreateRelationsTable extends Migration
      */
     public function down()
     {
-        Schema::table('relation_members', function (Blueprint $table) {
-            $table->dropForeign(['relation_id']);
-        });
         Schema::dropIfExists('relation_members');
-
-        Schema::table('relation_tags', function (Blueprint $table) {
-            $table->dropForeign(['relation_id']);
-        });
         Schema::dropIfExists('relation_tags');
-
         Schema::dropIfExists('relations');
     }
 }
