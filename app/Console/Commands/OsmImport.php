@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Database\Query\Grammars\MysqlInsertIgnore;
 use App\Jobs\ProcessElements;
 use App\Models\OSM\Node;
 use App\Models\OSM\NodeTag;
@@ -14,6 +15,7 @@ use App\Models\OSM\WayNode;
 use App\Models\OSM\WayTag;
 use Illuminate\Console\Command;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 use OsmPbf\Reader;
@@ -98,8 +100,8 @@ class OsmImport extends Command
             'replication_sequence' => $replication_sequence,
             'replication_url' => $replication_url
         ]);
+        DB::connection()->setQueryGrammar(new MysqlInsertIgnore());
         $reader = $pbfreader->getReader();
-
 
         $total = $reader->getEofPosition();
         $this->output->progressStart($total);
@@ -108,7 +110,6 @@ class OsmImport extends Command
             $current = $reader->getPosition();
             $this->output->progressAdvance($current - $last_position);
             $this->insertElements($pbfreader->getElements());
-//        dispatch(new ProcessElements($elements));
             $last_position = $current;
         }
         $this->output->progressFinish();
