@@ -29,6 +29,8 @@ class CreateWaysTable extends Migration
             $table->bigInteger("way_id", false, true)->nullable(false);
             $table->string("k");
             $table->string("v");
+
+            $table->index("way_id","way_id");
         });
 
 
@@ -37,6 +39,9 @@ class CreateWaysTable extends Migration
             $table->bigInteger("way_id", false, true);
             $table->bigInteger("node_id", false, true);
             $table->bigInteger("sequence");
+
+            $table->index("way_id","way_id");
+            $table->index("node_id","node_id");
         });
     }
 

@@ -29,6 +29,8 @@ class CreateRelationsTable extends Migration
             $table->bigInteger("relation_id", false, true)->nullable(false);
             $table->string("k");
             $table->string("v");
+
+            $table->index("relation_id","relation_id");
         });
 
         Schema::create('relation_members', function (Blueprint $table) {
@@ -38,6 +40,9 @@ class CreateRelationsTable extends Migration
             $table->bigInteger("member_id", false, true);
             $table->string("member_role");
             $table->bigInteger("sequence");
+
+            $table->index("relation_id","relation_id");
+            $table->index("member_id","member_id");
         });
 
 

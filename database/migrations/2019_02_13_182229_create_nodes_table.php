@@ -31,6 +31,8 @@ class CreateNodesTable extends Migration
             $table->bigInteger("node_id", false, true)->nullable(false);
             $table->string("k");
             $table->string("v");
+
+            $table->index("node_id", "node_id");
         });
     }
 
