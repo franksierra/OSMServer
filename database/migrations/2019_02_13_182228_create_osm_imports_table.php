@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateOsmSettingsTable extends Migration
+class CreateOsmImportsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class CreateOsmSettingsTable extends Migration
      */
     public function up()
     {
-        Schema::create('osm_settings', function (Blueprint $table) {
+        Schema::create('osm_imports', function (Blueprint $table) {
             $table->bigInteger("id", true);
-            $table->string("country");
+            $table->string("country", 2);
 
             $table->decimal("bbox_left", 13, 10);
             $table->decimal("bbox_bottom", 13, 10);
@@ -26,6 +26,7 @@ class CreateOsmSettingsTable extends Migration
             $table->integer("replication_sequence", false, true);
             $table->string("replication_url");
 
+            $table->timestamps();
         });
     }
 
@@ -36,6 +37,6 @@ class CreateOsmSettingsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('osm_settings');
+        Schema::dropIfExists('osm_imports');
     }
 }

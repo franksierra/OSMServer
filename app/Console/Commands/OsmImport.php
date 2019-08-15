@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Jobs\ProcessElements;
 use App\Models\OSM\Node;
 use App\Models\OSM\NodeTag;
-use App\Models\OSM\OsmSettings;
+use App\Models\OSM\OsmImports;
 use App\Models\OSM\Relation;
 use App\Models\OSM\RelationMember;
 use App\Models\OSM\RelationTag;
@@ -25,7 +25,7 @@ class OsmImport extends Command
      *
      * @var string
      */
-    protected $signature = 'osm:import {filename}';
+    protected $signature = 'osm:import {country} {filename}';
 
     /**
      * The console command description.
@@ -36,8 +36,16 @@ class OsmImport extends Command
 
     private $storagePath = '';
     private $inputfolder = 'OsmImport/';
-    private $outputfolder = 'OsmExport/';
-    private $outputhandlers = [];
+    private $counts = [
+        "node" => 0,
+        "node_tags" => 0,
+        "way" => 0,
+        "way_tags" => 0,
+        "way_nodes" => 0,
+        "relation" => 0,
+        "relation_tags" => 0,
+        "relation_members" => 0,
+    ];
 
     /**
      * Create a new command instance.
@@ -57,10 +65,10 @@ class OsmImport extends Command
     public function handle()
     {
         Storage::disk('local')->makeDirectory($this->inputfolder);
-        Storage::disk('local')->makeDirectory($this->outputfolder);
         $this->storagePath = Storage::disk('local')->getDriver()->getAdapter()->getPathPrefix();
 
         $start_time = time();
+        $country = $this->argument('country');
         $filename = $this->argument('filename');
         $full_file_name = $this->storagePath . $this->inputfolder . $filename;
         if (!Storage::disk('local')->exists($this->inputfolder . $filename)) {
@@ -80,33 +88,122 @@ class OsmImport extends Command
         $replication_sequence = $file_header->getOsmosisReplicationSequenceNumber();
         $replication_url = $file_header->getOsmosisReplicationBaseUrl();
 
-//        OsmSettings::create([
-//            'country' => "EC",
-//            'bbox_left' => $bbox_left,
-//            'bbox_bottom' => $bbox_bottom,
-//            'bbox_right' => $bbox_right,
-//            'bbox_top' => $bbox_top,
-//            'replication_timestamp' => $replication_timestamp,
-//            'replication_sequence' => $replication_sequence,
-//            'replication_url' => $replication_url
-//        ]);
+        OsmImports::create([
+            'country' => $country,
+            'bbox_left' => $bbox_left,
+            'bbox_bottom' => $bbox_bottom,
+            'bbox_right' => $bbox_right,
+            'bbox_top' => $bbox_top,
+            'replication_timestamp' => $replication_timestamp,
+            'replication_sequence' => $replication_sequence,
+            'replication_url' => $replication_url
+        ]);
         $reader = $pbfreader->getReader();
 
 
         $total = $reader->getEofPosition();
         $this->output->progressStart($total);
         $last_position = 0;
-        while ($data = $pbfreader->next()) {
+        while ($pbfreader->next()) {
             $current = $reader->getPosition();
             $this->output->progressAdvance($current - $last_position);
-            $elements = $pbfreader->getElements();
-            dispatch(new ProcessElements($elements));
+            $this->insertElements($pbfreader->getElements());
+//        dispatch(new ProcessElements($elements));
             $last_position = $current;
         }
         $this->output->progressFinish();
         $end_time = time();
-        echo "This process took " . ($end_time - $start_time) . " seconds";
+        $this->output->writeln("This process took " . ($end_time - $start_time) . " seconds");
+        $this->output->writeln("Processed Records:");
+        $this->output->writeln("Nodes: " . $this->counts["node"]);
+        $this->output->writeln("Node Tags: " . $this->counts["node_tags"]);
+        $this->output->writeln("Ways: " . $this->counts["way"]);
+        $this->output->writeln("Way Tags: " . $this->counts["way_tags"]);
+        $this->output->writeln("Way Nodes: " . $this->counts["way_nodes"]);
+        $this->output->writeln("Relations: " . $this->counts["relation"]);
+        $this->output->writeln("Relation Tags: " . $this->counts["relation_tags"]);
+        $this->output->writeln("Relation Members: " . $this->counts["relation_members"]);
         return true;
     }
 
+    public function insertElements($elements)
+    {
+        $type = $elements['type'];
+
+        $records = [];
+        $tags = [];
+        $nodes = [];
+        $relations = [];
+
+        foreach ($elements['data'] as $element) {
+            $insert_element = [
+                'id' => $element['id'],
+                'changeset_id' => $element['changeset_id'],
+                'visible' => $element['visible'],
+                'timestamp' => $element['timestamp'],
+                'version' => $element['version'],
+                'uid' => $element['uid'],
+                'user' => $element['user'],
+            ];
+            if ($type == "node") {
+                $insert_element["latitude"] = $element["latitude"];
+                $insert_element["longitude"] = $element["longitude"];
+            }
+            if (isset($element["timestamp"])) {
+                $insert_element["timestamp"] = str_replace("T", " ", $element["timestamp"]);
+                $insert_element["timestamp"] = str_replace("Z", "", $element["timestamp"]);
+            }
+            $records[] = $insert_element;
+
+            foreach ($element["tags"] as $tag) {
+                $tags[] = [
+                    $type . "_id" => $element["id"],
+                    "k" => $tag["key"],
+                    "v" => $tag["value"]
+                ];
+            }
+            foreach ($element["nodes"] as $node) {
+                $nodes[] = [
+                    $type . "_id" => $element["id"],
+                    "node_id" => $node["id"],
+                    "sequence" => $node["sequence"]
+                ];
+            }
+
+            foreach ($element["relations"] as $relation) {
+                $relations[] = [
+                    $type . "_id" => $element["id"],
+                    "member_type" => $relation["member_type"],
+                    "member_id" => $relation["member_id"],
+                    "member_role" => $relation["member_role"],
+                    "sequence" => $relation["sequence"]
+                ];
+            }
+        }
+        /** @var Node|Way|Relation $elementObjName */
+        $elementObjName = "App\\Models\\OSM\\" . ucfirst($type);
+        /** @var NodeTag|WayTag|RelationTag $elementTagName */
+        $elementTagName = "App\\Models\\OSM\\" . ucfirst($type) . "Tag";
+
+        $chunk_size = 6550;
+        foreach (array_chunk($records, $chunk_size) as $chunk) {
+            $this->counts[$type] += count($chunk);
+            $elementObjName::insert($chunk);
+        }
+
+        foreach (array_chunk($tags, $chunk_size) as $chunk) {
+            $this->counts[$type . "_tags"] += count($chunk);
+            $elementTagName::insert($chunk);
+        }
+
+        foreach (array_chunk($nodes, $chunk_size) as $chunk) {
+            $this->counts["way_nodes"] += count($chunk);
+            WayNode::insert($chunk);
+        }
+
+        foreach (array_chunk($relations, $chunk_size) as $chunk) {
+            $this->counts["relation_members"] += count($chunk);
+            RelationMember::insert($chunk);
+        }
+    }
 }
