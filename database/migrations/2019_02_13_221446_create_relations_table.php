@@ -27,10 +27,11 @@ class CreateRelationsTable extends Migration
         Schema::create('relation_tags', function (Blueprint $table) {
             $table->engine = 'MyISAM';
             $table->bigInteger("relation_id", false, true)->nullable(false);
-            $table->string("k");
+            $table->string("k", 191);
             $table->string("v");
 
             $table->index("relation_id","relation_id");
+            $table->unique(['relation_id', 'k'], 'unique_relation_id_k');
         });
 
         Schema::create('relation_members', function (Blueprint $table) {
@@ -43,6 +44,7 @@ class CreateRelationsTable extends Migration
 
             $table->index("relation_id","relation_id");
             $table->index("member_id","member_id");
+            $table->unique(['relation_id', 'member_id'], 'unique_relation_id_member_id');
         });
 
 

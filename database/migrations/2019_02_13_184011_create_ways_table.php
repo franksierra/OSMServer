@@ -27,10 +27,11 @@ class CreateWaysTable extends Migration
         Schema::create('way_tags', function (Blueprint $table) {
             $table->engine = 'MyISAM';
             $table->bigInteger("way_id", false, true)->nullable(false);
-            $table->string("k");
+            $table->string("k",191);
             $table->string("v");
 
             $table->index("way_id","way_id");
+            $table->unique(['way_id', 'k'], 'unique_way_id_k');
         });
 
 
@@ -42,6 +43,7 @@ class CreateWaysTable extends Migration
 
             $table->index("way_id","way_id");
             $table->index("node_id","node_id");
+            $table->unique(['way_id', 'node_id'], 'unique_way_id_node_id');
         });
     }
 
