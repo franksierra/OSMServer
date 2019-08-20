@@ -54,9 +54,24 @@ class Relation extends Model
         return $this->hasMany(RelationTag::class);
     }
 
-    public function members()
+    public function ways()
+    {
+
+    }
+
+    public function nodes()
     {
         return $this->hasMany(RelationMember::class);
+    }
+
+    public function relations()
+    {
+
+    }
+
+    public function members()
+    {
+        return $this->hasMany(RelationMember::class)->orderBy("sequence");
     }
 
 }

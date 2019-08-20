@@ -61,7 +61,7 @@ class Node extends Model
 
     public function ways()
     {
-        return $this->hasManyThrough(Way::class, WayNode::class);
+        return $this->hasManyThrough(Way::class, WayNode::class)->orderBy("sequence");
     }
 
 }
