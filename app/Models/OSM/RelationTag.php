@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\RelationTag whereK($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\RelationTag whereRelationId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\RelationTag whereV($value)
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\RelationTag[] $tags
  * @mixin \Eloquent
  */
 class RelationTag extends Model
@@ -39,6 +40,11 @@ class RelationTag extends Model
     public function relation()
     {
         return $this->belongsTo(Relation::class);
+    }
+
+    public function tags()
+    {
+        return $this->hasMany(RelationTag::class, "relation_id", "relation_id");
     }
 
 }

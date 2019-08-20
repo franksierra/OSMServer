@@ -47,4 +47,9 @@ class RelationMember extends Model
         return $this->belongsTo(Relation::class);
     }
 
+    public function member()
+    {
+        return $this->morphTo();
+    }
+
 }

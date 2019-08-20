@@ -56,7 +56,7 @@ class Way extends Model
 
     public function nodes()
     {
-        return $this->hasMany(WayNode::class);
+        return $this->hasManyThrough(Node::class,WayNode::class);
     }
 
 }

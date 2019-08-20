@@ -36,7 +36,7 @@ class WayTag extends Model
         'v'
     ];
 
-    public function tag()
+    public function way()
     {
         return $this->belongsTo(Way::class);
     }

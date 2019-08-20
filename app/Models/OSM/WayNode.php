@@ -41,4 +41,9 @@ class WayNode extends Model
         return $this->belongsTo(Way::class);
     }
 
+    public function node()
+    {
+        return $this->belongsTo(Node::class);
+    }
+
 }

@@ -59,4 +59,9 @@ class Node extends Model
         return $this->hasMany(NodeTag::class);
     }
 
+    public function ways()
+    {
+        return $this->hasManyThrough(Way::class, WayNode::class);
+    }
+
 }
