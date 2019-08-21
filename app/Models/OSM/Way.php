@@ -59,4 +59,9 @@ class Way extends Model
         return $this->hasManyThrough(Node::class,WayNode::class)->orderBy("sequence");
     }
 
+    public function relations()
+    {
+        return $this->morphToMany(Relation::class,'member',RelationMember::class);
+    }
+
 }

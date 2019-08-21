@@ -9,6 +9,7 @@
 namespace App\Models\OSM;
 
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -54,24 +55,18 @@ class Relation extends Model
         return $this->hasMany(RelationTag::class);
     }
 
-    public function ways()
-    {
-
-    }
-
     public function nodes()
     {
-        return $this->hasMany(RelationMember::class);
+        return $this->morphedByMany(Node::class, "member", RelationMember::class);
+    }
+
+    public function ways()
+    {
+        return $this->morphedByMany(Way::class, "member", RelationMember::class);
     }
 
     public function relations()
     {
-
+        return $this->morphedByMany(Relation::class, "member", RelationMember::class);
     }
-
-    public function members()
-    {
-        return $this->hasMany(RelationMember::class)->orderBy("sequence");
-    }
-
 }

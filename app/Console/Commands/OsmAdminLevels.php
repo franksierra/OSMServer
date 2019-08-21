@@ -4,6 +4,7 @@
 namespace App\Console\Commands;
 
 
+use App\Models\OSM\Relation;
 use App\Models\OSM\RelationTag;
 use App\Models\TerritorialDivision;
 use Illuminate\Console\Command;
@@ -41,19 +42,19 @@ class OsmAdminLevels extends Command
      */
     public function handle()
     {
-        $countries = RelationTag::where("k", "=", "admin_level")
-            ->where("v", "=", "2")
-            ->get("relation_id");
-        foreach ($countries as $country) {
-
-            $tag = $country->tags->where("k", "=", "name")->first();
-//            TerritorialDivision::create([
-//                'relation_id' => $country->relation_id,
-//                'parent_relation_id' => "0",
-//                'name' => $tag->v
-//            ]);
-
-        }
+        $relation = Relation::->tags->where("k", "=", "admin_level")
+            ->where("v", "=", "2");
+        dd($relation);
+//        foreach ($countries as $country) {
+//
+//            $tag = $country->tags->where("k", "=", "name")->first();
+////            TerritorialDivision::create([
+////                'relation_id' => $country->relation_id,
+////                'parent_relation_id' => "0",
+////                'name' => $tag->v
+////            ]);
+//
+//        }
 
 
         return true;

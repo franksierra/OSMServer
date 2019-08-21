@@ -42,14 +42,4 @@ class RelationMember extends Model
         'sequence'
     ];
 
-    public function relation()
-    {
-        return $this->belongsTo(Relation::class);
-    }
-
-    public function member()
-    {
-        return $this->morphTo();
-    }
-
 }

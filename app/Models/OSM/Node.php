@@ -10,6 +10,7 @@ namespace App\Models\OSM;
 
 
 use Illuminate\Database\Eloquent\Model;
+use test\Mockery\ReturnTypeObjectTypeHint;
 
 /**
  * App\Models\OSM\Node
@@ -61,7 +62,12 @@ class Node extends Model
 
     public function ways()
     {
-        return $this->hasManyThrough(Way::class, WayNode::class)->orderBy("sequence");
+        return $this->hasManyThrough(Way::class, WayNode::class)->orderBy('sequence');
+    }
+
+    public function relations()
+    {
+        return $this->morphToMany(Relation::class,'member',RelationMember::class);
     }
 
 }
