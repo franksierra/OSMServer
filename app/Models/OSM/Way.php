@@ -34,6 +34,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Way whereVersion($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Way whereVisible($value)
  * @mixin \Eloquent
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\Relation[] $relations
  */
 class Way extends Model
 {
@@ -56,12 +57,23 @@ class Way extends Model
 
     public function nodes()
     {
-        return $this->hasManyThrough(Node::class,WayNode::class)->orderBy("sequence");
+        return $this
+            ->hasManyThrough(
+                Node::class,
+                WayNode::class,
+                "way_id",
+                "id",
+                null,
+                "node_id"
+            )
+            ->addSelect("*")
+            ->addSelect("sequence")
+            ->orderBy("sequence");
     }
 
     public function relations()
     {
-        return $this->morphToMany(Relation::class,'member',RelationMember::class);
+        return $this->morphToMany(Relation::class, 'member', RelationMember::class);
     }
 
 }

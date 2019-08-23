@@ -35,6 +35,9 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Relation whereVersion($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Relation whereVisible($value)
  * @mixin \Eloquent
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\Node[] $nodes
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\Relation[] $relations
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\Way[] $ways
  */
 class Relation extends Model
 {
@@ -57,16 +60,21 @@ class Relation extends Model
 
     public function nodes()
     {
-        return $this->morphedByMany(Node::class, "member", RelationMember::class);
+        return $this->morphedByMany(Node::class, 'member', RelationMember::class)
+            ->orderBy('sequence', 'ASC');
     }
 
     public function ways()
     {
-        return $this->morphedByMany(Way::class, "member", RelationMember::class);
+        return $this->morphedByMany(Way::class, 'member', RelationMember::class)
+            ->addSelect("*")
+            ->addSelect("sequence")
+            ->orderBy('sequence', 'ASC');
     }
 
     public function relations()
     {
-        return $this->morphedByMany(Relation::class, "member", RelationMember::class);
+        return $this->morphedByMany(Relation::class, 'member', RelationMember::class)
+            ->orderBy('sequence', 'ASC');
     }
 }

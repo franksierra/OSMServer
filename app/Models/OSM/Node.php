@@ -38,6 +38,8 @@ use test\Mockery\ReturnTypeObjectTypeHint;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node whereVersion($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node whereVisible($value)
  * @mixin \Eloquent
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\Relation[] $relations
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\Way[] $ways
  */
 class Node extends Model
 {
@@ -62,12 +64,23 @@ class Node extends Model
 
     public function ways()
     {
-        return $this->hasManyThrough(Way::class, WayNode::class)->orderBy('sequence');
+        return $this
+            ->hasManyThrough(
+                Way::class,
+                WayNode::class,
+                "node_id",
+                "id",
+                null,
+                "way_id"
+            )
+            ->addSelect("*")
+            ->addSelect("sequence")
+            ->orderBy("sequence");
     }
 
     public function relations()
     {
-        return $this->morphToMany(Relation::class,'member',RelationMember::class);
+        return $this->morphToMany(Relation::class, 'member', RelationMember::class);
     }
 
 }

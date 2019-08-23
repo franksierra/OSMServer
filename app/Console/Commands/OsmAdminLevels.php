@@ -4,10 +4,15 @@
 namespace App\Console\Commands;
 
 
+use App\Geo\MultiPolygon;
 use App\Models\OSM\Relation;
 use App\Models\OSM\RelationTag;
+use App\Models\OSM\Way;
 use App\Models\TerritorialDivision;
 use Illuminate\Console\Command;
+
+use App\Geo\Point;
+use App\Geo\Line;
 
 class OsmAdminLevels extends Command
 {
@@ -42,22 +47,90 @@ class OsmAdminLevels extends Command
      */
     public function handle()
     {
-        $relation = Relation::->tags->where("k", "=", "admin_level")
-            ->where("v", "=", "2");
-        dd($relation);
-//        foreach ($countries as $country) {
+        $countryTags = RelationTag::where('k', '=', 'admin_level')
+            ->whereIn('v', [2, 4, 8])
+            ->orderBy('v', 'ASC')->get();
+        foreach ($countryTags as $countryTag) {
+            $relationId = $countryTag->relation->id;
+            $name = $countryTag->relation->tags()->where('k', '=', 'name')->first()->v;
+
+            $geometry = $this->buildGeometry($relationId);
+
+//            TerritorialDivision::create([
+//                'relation_id' => $relationId,
+//                'parent_relation_id' => '0',
+//                'name' => $name,
+////                'geometry' => new MultiPolygon()
+//            ]);
 //
-//            $tag = $country->tags->where("k", "=", "name")->first();
-////            TerritorialDivision::create([
-////                'relation_id' => $country->relation_id,
-////                'parent_relation_id' => "0",
-////                'name' => $tag->v
-////            ]);
-//
-//        }
+        }
 
 
         return true;
+    }
+
+    private function buildGeometry($relationId)
+    {
+        /** @var Point[] $points */
+        $points = [];
+        /** @var Line[] $lines */
+        $lines = [];
+        $empty = [];
+        $first = null;
+        $last = null;
+
+        $ways = Relation::find($relationId)->ways();
+        foreach ($ways as $way) {
+            $lines[$way->id] = new Line($way->id, $way->sequence);
+            $lines[$way->id]->previous = $last;
+            $nodes = Way::find($way->id)->nodes;
+            if ($nodes->count() > 0) {
+                foreach ($nodes as $node) {
+                    $points[$node->id] = new Point(
+                        $node->id,
+                        $node->latitude,
+                        $node->latitude,
+                        $node->sequence
+                    );
+                    $lines[$way->id]->addPoint($points[$node->id]);
+                }
+            } else {
+                $empty[$way->id] = true;
+            }
+            if ($first == null) {
+                $first =& $lines[$way->id];
+            }
+            $last =& $lines[$way->id];
+            unset($nodes, $node);
+        }
+
+        unset($ways, $way, $nodes, $node);
+        $next =& $first;
+        foreach (array_reverse($lines) as &$way) {
+            $way->next = $next;
+            $next =& $way;
+        }
+        $first->previous =& $last;
+        unset($next, $first, $last, $way);
+
+        if (count($empty) > 0) {
+            $o = 0;
+        }
+        $multiPolygons = new MultiPolygon($relationId);
+        $current = array_values($lines)[0];
+        $first = $current;
+        while ($current != null) {
+            $multiPolygons->addLine($current);
+            $next = $current->next;
+            if ($next->id != $first->id) {
+                $current = $next;
+            } else {
+                $current = null;
+            }
+        }
+        $multiPolygons->finishPolygon($empty);
+
+        return $multiPolygons;
     }
 
 

@@ -8,15 +8,15 @@
 
 namespace App\Models\OSM;
 
-
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * App\Models\OSM\WayNode
+ * App\Models\OSM\NodeWay
  *
- * @property int $way_id
  * @property int $node_id
+ * @property int $way_id
  * @property int $sequence
+ * @property-read \App\Models\OSM\Node $node
  * @property-read \App\Models\OSM\Way $way
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\WayNode newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\WayNode newQuery()
@@ -28,22 +28,24 @@ use Illuminate\Database\Eloquent\Model;
  */
 class WayNode extends Model
 {
+
     public $timestamps = false;
 
     protected $fillable = [
-        'way_id',
         'node_id',
+        'way_id',
         'sequence'
     ];
 
-    public function way()
+    public function nodes()
     {
-        return $this->belongsTo(Way::class);
+        return $this->hasMany(Node::class);
     }
 
-    public function node()
+    public function ways()
     {
-        return $this->belongsTo(Node::class);
+        return $this->hasMany(Way::class);
     }
+
 
 }

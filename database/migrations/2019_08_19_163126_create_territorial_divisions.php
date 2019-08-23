@@ -14,10 +14,10 @@ class CreateTerritorialDivisions extends Migration
     public function up()
     {
         Schema::create('territorial_divisions', function (Blueprint $table) {
-            $table->bigInteger("relation_id",false)->primary();
+            $table->bigInteger("relation_id", false)->primary();
             $table->bigInteger('parent_relation_id');
             $table->string('name');
-            $table->geometry("geom")->nullable();
+            $table->multiPolygon("geometry")->nullable();
         });
     }
 

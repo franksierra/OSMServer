@@ -30,6 +30,8 @@ class NodeTag extends Model
 {
     public $timestamps = false;
 
+    protected $primaryKey = "node_id";
+
     protected $fillable = [
         'node_id',
         'k',
@@ -39,6 +41,11 @@ class NodeTag extends Model
     public function node()
     {
         return $this->belongsTo(Node::class);
+    }
+
+    public function tags()
+    {
+        return $this->hasMany(NodeTag::class, "node_id", "node_id");
     }
 
 }
