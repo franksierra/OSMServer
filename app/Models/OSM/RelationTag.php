@@ -24,13 +24,13 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\RelationTag whereK($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\RelationTag whereRelationId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\RelationTag whereV($value)
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\RelationTag[] $tags
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\RelationTag[] $otherTags
  * @mixin \Eloquent
  */
 class RelationTag extends Model
 {
     public $timestamps = false;
-
+    protected $primaryKey = "relation_id";
     protected $fillable = [
         'relation_id',
         'k',
@@ -41,10 +41,4 @@ class RelationTag extends Model
     {
         return $this->belongsTo(Relation::class);
     }
-
-    public function tags()
-    {
-        return $this->hasMany(RelationTag::class, "relation_id", "relation_id");
-    }
-
 }

@@ -33,7 +33,6 @@ class OsmFixMissing extends Command
 
     private $storagePath = '';
     private $inputfolder = 'OsmFixCache/';
-    private $outputfolder = 'OsmFixExport/';
     private $outputhandlers = [];
 
     /**
@@ -45,7 +44,6 @@ class OsmFixMissing extends Command
     {
         parent::__construct();
         Storage::disk('local')->makeDirectory($this->inputfolder);
-        Storage::disk('local')->makeDirectory($this->outputfolder);
         $this->storagePath = Storage::disk('local')->getDriver()->getAdapter()->getPathPrefix();
     }
 

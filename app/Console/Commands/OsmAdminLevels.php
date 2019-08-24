@@ -48,13 +48,13 @@ class OsmAdminLevels extends Command
     public function handle()
     {
         $countryTags = RelationTag::where('k', '=', 'admin_level')
-            ->whereIn('v', [2, 4, 8])
-            ->orderBy('v', 'ASC')->get();
-        foreach ($countryTags as $countryTag) {
-            $relationId = $countryTag->relation->id;
-            $name = $countryTag->relation->tags()->where('k', '=', 'name')->first()->v;
+            ->whereIn('v', [2])
+            ->orderBy('relation_id', 'ASC')->get();
+        foreach ($countryTags as $tag) {
 
-            $geometry = $this->buildGeometry($relationId);
+            $tags = $tag->relation->tags()->where('k', '=', 'name')->first();
+            $name = $tags->v;
+            $geometry = $this->relationGeometry($tag->relation->id);
 
 //            TerritorialDivision::create([
 //                'relation_id' => $relationId,
@@ -69,7 +69,7 @@ class OsmAdminLevels extends Command
         return true;
     }
 
-    private function buildGeometry($relationId)
+    private function relationGeometry($relationId)
     {
         /** @var Point[] $points */
         $points = [];
@@ -79,7 +79,7 @@ class OsmAdminLevels extends Command
         $first = null;
         $last = null;
 
-        $ways = Relation::find($relationId)->ways();
+        $ways = Relation::find($relationId)->ways;
         foreach ($ways as $way) {
             $lines[$way->id] = new Line($way->id, $way->sequence);
             $lines[$way->id]->previous = $last;

@@ -30,23 +30,11 @@ use Illuminate\Database\Eloquent\Model;
 class WayTag extends Model
 {
     public $timestamps = false;
-
     protected $primaryKey = "way_id";
-
     protected $fillable = [
         'way_id',
         'k',
         'v'
     ];
-
-    public function way()
-    {
-        return $this->belongsTo(Way::class);
-    }
-
-    public function tags()
-    {
-        return $this->hasMany(WayTag::class, "way_id", "way_id");
-    }
 
 }

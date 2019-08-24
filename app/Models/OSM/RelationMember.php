@@ -33,7 +33,7 @@ use Illuminate\Database\Eloquent\Model;
 class RelationMember extends Model
 {
     public $timestamps = false;
-
+    protected $primaryKey = "relation_id";
     protected $fillable = [
         'relation_id',
         'member_type',

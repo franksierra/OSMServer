@@ -58,23 +58,5 @@ class Relation extends Model
         return $this->hasMany(RelationTag::class);
     }
 
-    public function nodes()
-    {
-        return $this->morphedByMany(Node::class, 'member', RelationMember::class)
-            ->orderBy('sequence', 'ASC');
-    }
 
-    public function ways()
-    {
-        return $this->morphedByMany(Way::class, 'member', RelationMember::class)
-            ->addSelect("*")
-            ->addSelect("sequence")
-            ->orderBy('sequence', 'ASC');
-    }
-
-    public function relations()
-    {
-        return $this->morphedByMany(Relation::class, 'member', RelationMember::class)
-            ->orderBy('sequence', 'ASC');
-    }
 }

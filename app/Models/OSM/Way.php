@@ -50,30 +50,4 @@ class Way extends Model
         'user'
     ];
 
-    public function tags()
-    {
-        return $this->hasMany(WayTag::class);
-    }
-
-    public function nodes()
-    {
-        return $this
-            ->hasManyThrough(
-                Node::class,
-                WayNode::class,
-                "way_id",
-                "id",
-                null,
-                "node_id"
-            )
-            ->addSelect("*")
-            ->addSelect("sequence")
-            ->orderBy("sequence");
-    }
-
-    public function relations()
-    {
-        return $this->morphToMany(Relation::class, 'member', RelationMember::class);
-    }
-
 }

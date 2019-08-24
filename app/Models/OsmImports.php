@@ -6,7 +6,7 @@
  * Time: 9:56 AM
  */
 
-namespace App\Models\OSM;
+namespace App\Models;
 
 
 use Illuminate\Database\Eloquent\Model;
@@ -23,12 +23,12 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $replication_timestamp
  * @property int $replication_sequence
  * @property string $replication_url
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\OsmImports newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\OsmImports newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\OsmImports query()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\OsmImports whereBboxBottom($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\OsmImports whereBboxLeft($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\OsmImports whereBboxRight($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OsmImports newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OsmImports newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OsmImports query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OsmImports whereBboxBottom($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OsmImports whereBboxLeft($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OsmImports whereBboxRight($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\OsmImports whereBboxTop($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\OsmImports whereCountry($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\OsmImports whereId($value)

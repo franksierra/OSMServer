@@ -30,22 +30,11 @@ class WayNode extends Model
 {
 
     public $timestamps = false;
-
+    protected $primaryKey = "way_id";
     protected $fillable = [
-        'node_id',
         'way_id',
+        'node_id',
         'sequence'
     ];
-
-    public function nodes()
-    {
-        return $this->hasMany(Node::class);
-    }
-
-    public function ways()
-    {
-        return $this->hasMany(Way::class);
-    }
-
 
 }
