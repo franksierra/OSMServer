@@ -37,4 +37,9 @@ class WayNode extends Model
         'sequence'
     ];
 
+    public function nodes()
+    {
+        return $this->hasMany(Node::class, 'id');
+    }
+
 }

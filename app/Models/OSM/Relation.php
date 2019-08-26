@@ -58,5 +58,9 @@ class Relation extends Model
         return $this->hasMany(RelationTag::class);
     }
 
+    public function members()
+    {
+        return $this->hasMany(RelationMember::class);
+    }
 
 }

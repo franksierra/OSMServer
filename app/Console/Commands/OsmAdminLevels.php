@@ -6,8 +6,10 @@ namespace App\Console\Commands;
 
 use App\Geo\MultiPolygon;
 use App\Models\OSM\Relation;
+use App\Models\OSM\RelationMember;
 use App\Models\OSM\RelationTag;
 use App\Models\OSM\Way;
+use App\Models\OSM\WayNode;
 use App\Models\TerritorialDivision;
 use Illuminate\Console\Command;
 
@@ -79,11 +81,19 @@ class OsmAdminLevels extends Command
         $first = null;
         $last = null;
 
-        $ways = Relation::find($relationId)->ways;
+//        $ways = RelationMember::leftJoin('ways', 'member_id', '=', 'ways.id')
+//            ->where('relation_id', '=', $relationId)
+//            ->where('member_type', '=', 'way')
+//            ->orderBy('sequence', 'ASC')
+//            ->get();
+        $relations = Relation::find($relationId)->get();
+        $members = $relations->members;
+
+        $ways = RelationMember::find($relationId)->member;
         foreach ($ways as $way) {
             $lines[$way->id] = new Line($way->id, $way->sequence);
             $lines[$way->id]->previous = $last;
-            $nodes = Way::find($way->id)->nodes;
+            $nodes = $way->nodes()->toSql();
             if ($nodes->count() > 0) {
                 foreach ($nodes as $node) {
                     $points[$node->id] = new Point(

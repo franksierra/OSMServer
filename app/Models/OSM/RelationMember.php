@@ -32,6 +32,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class RelationMember extends Model
 {
+
     public $timestamps = false;
     protected $primaryKey = "relation_id";
     protected $fillable = [
@@ -41,5 +42,15 @@ class RelationMember extends Model
         'member_role',
         'sequence'
     ];
+
+    public function relation()
+    {
+        return $this->belongsTo(Relation::class, 'relation_id');
+    }
+
+    public function member()
+    {
+        return $this->morphTo();
+    }
 
 }
