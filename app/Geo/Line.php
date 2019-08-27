@@ -3,25 +3,20 @@
 
 namespace App\Geo;
 
-class Line
+use Grimzy\LaravelMysqlSpatial\Types\LineString;
+
+class Line extends LineString
 {
     public $id;
     public $sequence;
-    /** @var Point[] $points */
-    public $points = [];
 
     public $previous = null;
     public $next = null;
 
-    public function __construct($id, $sequence)
+    public function __construct($id, $sequence, $points)
     {
         $this->id = $id;
         $this->sequence = $sequence;
+        parent::__construct($points);
     }
-
-    public function addPoint(&$point)
-    {
-        $this->points[] = $point;
-    }
-
 }

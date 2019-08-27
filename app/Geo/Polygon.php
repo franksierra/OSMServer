@@ -28,4 +28,16 @@ class Polygon
     {
         return ($this->tail == $this->next);
     }
+
+    public function isEmpty()
+    {
+        return (count($this->lines) == 0);
+    }
+
+    public function toWKT()
+    {
+        return sprintf('POLYGON(%s)', (string) $this);
+    }
+
+
 }

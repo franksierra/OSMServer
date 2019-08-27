@@ -4,8 +4,6 @@
 namespace App\Geo;
 
 
-use App\Geo\Polygon;
-
 class MultiPolygon
 {
     public $id = null;
@@ -33,12 +31,23 @@ class MultiPolygon
     public function finishPolygon($empty)
     {
         $this->empty = $empty;
-        $this->polygons[] = $this->polygon;
+        if (!$this->polygon->isEmpty()) {
+            $this->polygons[] = $this->polygon;
+        }
         unset($this->polygon);
     }
 
     public function getGeom()
     {
+        $place1->area = new \Grimzy\LaravelMysqlSpatial\Types\Polygon([new \Grimzy\LaravelMysqlSpatial\Types\LineString([
+            new \GeoJson\Geometry\Point(40.74894149554006, -73.98615270853043),
+            new \Grimzy\LaravelMysqlSpatial\Types\Point(40.74848633046773, -73.98648262023926),
+            new Point(40.747925497790725, -73.9851602911949),
+            new Point(40.74837050671544, -73.98482501506805),
+            new Point(40.74894149554006, -73.98615270853043)
+        ])]);
+
+
         $geomString = '';
 
     }

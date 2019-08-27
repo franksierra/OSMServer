@@ -4,17 +4,15 @@
 namespace App\Console\Commands;
 
 
-use App\Geo\MultiPolygon;
-use App\Models\OSM\Relation;
-use App\Models\OSM\RelationMember;
+use App\Geo\Line;
+
 use App\Models\OSM\RelationTag;
-use App\Models\OSM\Way;
-use App\Models\OSM\WayNode;
 use App\Models\TerritorialDivision;
+use Grimzy\LaravelMysqlSpatial\Types\MultiPolygon;
+use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Console\Command;
 
-use App\Geo\Point;
-use App\Geo\Line;
+use Illuminate\Support\Facades\DB;
 
 class OsmAdminLevels extends Command
 {
@@ -58,13 +56,13 @@ class OsmAdminLevels extends Command
             $name = $tags->v;
             $geometry = $this->relationGeometry($tag->relation->id);
 
-//            TerritorialDivision::create([
-//                'relation_id' => $relationId,
-//                'parent_relation_id' => '0',
-//                'name' => $name,
-////                'geometry' => new MultiPolygon()
-//            ]);
-//
+            TerritorialDivision::create([
+                'relation_id' => $tag->relation->id,
+                'parent_relation_id' => '0',
+                'name' => $name,
+//                'geometry' => new MultiPolygon()
+            ]);
+
         }
 
 
@@ -81,32 +79,38 @@ class OsmAdminLevels extends Command
         $first = null;
         $last = null;
 
-//        $ways = RelationMember::leftJoin('ways', 'member_id', '=', 'ways.id')
-//            ->where('relation_id', '=', $relationId)
-//            ->where('member_type', '=', 'way')
-//            ->orderBy('sequence', 'ASC')
-//            ->get();
-        $relations = Relation::find($relationId)->get();
-        $members = $relations->members;
-
-        $ways = RelationMember::find($relationId)->member;
+        $ways = DB::table('relations')
+            ->leftJoin('relation_members', 'relations.id', '=', 'relation_members.relation_id')
+            ->where('id', '=', $relationId)
+            ->where('member_type', '=', 'way')
+            ->orderBy('relation_members.sequence', 'ASC')
+            ->get([
+                'relation_members.member_id as id',
+                'relation_members.member_type as type',
+                'relation_members.member_role as role',
+                'relation_members.sequence as sequence'
+            ]);
         foreach ($ways as $way) {
-            $lines[$way->id] = new Line($way->id, $way->sequence);
-            $lines[$way->id]->previous = $last;
-            $nodes = $way->nodes()->toSql();
+
+            $nodes = DB::table('way_nodes')
+                ->leftJoin('nodes', 'way_nodes.node_id', '=', 'nodes.id')
+                ->where('way_nodes.way_id', '=', $way->id)
+                ->orderBy('way_nodes.sequence', 'ASC')
+                ->get([
+                    'nodes.id as id',
+                    'nodes.latitude as latitude',
+                    'nodes.longitude as longitude',
+                    'way_nodes.sequence as sequence'
+                ]);
             if ($nodes->count() > 0) {
                 foreach ($nodes as $node) {
-                    $points[$node->id] = new Point(
-                        $node->id,
-                        $node->latitude,
-                        $node->latitude,
-                        $node->sequence
-                    );
-                    $lines[$way->id]->addPoint($points[$node->id]);
+                    $points[] = new Point($node->latitude, $node->latitude);
                 }
+                $lines[$way->id] = new Line($way->id, $way->sequence, $points);
             } else {
                 $empty[$way->id] = true;
             }
+            $lines[$way->id]->previous = $last;
             if ($first == null) {
                 $first =& $lines[$way->id];
             }
@@ -123,9 +127,6 @@ class OsmAdminLevels extends Command
         $first->previous =& $last;
         unset($next, $first, $last, $way);
 
-        if (count($empty) > 0) {
-            $o = 0;
-        }
         $multiPolygons = new MultiPolygon($relationId);
         $current = array_values($lines)[0];
         $first = $current;
