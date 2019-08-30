@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Geo\OSM;
 use App\Models\OSM\Node;
 use App\Models\OSM\NodeTag;
 use App\Models\OSM\Relation;
@@ -15,14 +16,14 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use OSMPBF\OSMReader;
 
-class OsmFixMissing extends Command
+class OsmFixMissingWays extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'osm:fix';
+    protected $signature = 'osm:fixways';
 
     /**
      * The console command description.
@@ -30,10 +31,6 @@ class OsmFixMissing extends Command
      * @var string
      */
     protected $description = 'Imports an OSM file into the database';
-
-    private $storagePath = '';
-    private $inputfolder = 'OsmFixCache/';
-    private $outputhandlers = [];
 
     /**
      * Create a new command instance.
@@ -43,8 +40,6 @@ class OsmFixMissing extends Command
     public function __construct()
     {
         parent::__construct();
-        Storage::disk('local')->makeDirectory($this->inputfolder);
-        $this->storagePath = Storage::disk('local')->getDriver()->getAdapter()->getPathPrefix();
     }
 
     /**
@@ -54,13 +49,17 @@ class OsmFixMissing extends Command
      */
     public function handle()
     {
-        $filename = $this->argument('filename');
-        $full_file_name = $this->storagePath . $this->inputfolder . $filename;
-        if (!Storage::disk('local')->exists($this->inputfolder . $filename)) {
-            $this->error('The file ' . $full_file_name . "does not exist!");
-            return false;
-        };
+        $adminLevels = RelationTag::where('k', '=', 'admin_level')
+            ->whereIn('v', [2])
+            ->orderBy('relation_id', 'ASC')->get();
+        foreach ($adminLevels as $adminLevel) {
+            $geometry = OSM::relationGeometry($adminLevel->relation->id);
+            foreach ($geometry[''] as $item) {
 
+            }
+
+
+        }
         //WIP:
 
         return true;

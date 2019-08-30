@@ -6,38 +6,47 @@ namespace App\Geo;
 
 class Polygon
 {
-    /** @var Line[] $lines */
-    public $lines = [];
+    /** @var Way[] $ways */
+    public $ways = [];
 
-    public $tail = -1;
-    public $head = 0;
-    public $next = 0;
-
-    public function addLine($line)
+    /**
+     * @param Way $way
+     */
+    public function addWay($way)
     {
-        if (count($this->lines) == 0) {
-            $this->tail = $line->id;
-        } else {
-            $this->head = $line->id;
-        }
-        $this->next = $line->next->id;
-        $this->lines[] = $line;
+        $this->ways[] = $way;
     }
 
     public function isClosed()
     {
-        return ($this->tail == $this->next);
+        if ($this->getFirstWay() != null && $this->getLastWay() != null) {
+            return $this->getFirstWay()->getFirstNode()->id == $this->getLastWay()->getLastNode()->id;
+        }
+        return false;
     }
 
     public function isEmpty()
     {
-        return (count($this->lines) == 0);
+        return (count($this->ways) == 0);
     }
 
-    public function toWKT()
+    public function getFirstWay()
     {
-        return sprintf('POLYGON(%s)', (string) $this);
+        return $this->ways[0] ?? null;
     }
 
+    public function getLastWay()
+    {
+        return $this->ways[count($this->ways) - 1] ?? null;
+    }
 
+    public function reverse()
+    {
+        $this->ways = array_reverse($this->ways);
+        /** @param Way $value */
+        $func = function ($value) {
+            $value->reverse();
+        };
+        array_map($func, $this->ways);
+    }
 }
