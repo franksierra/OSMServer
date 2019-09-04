@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Database\Query\Grammars;
-
 
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\Grammars\MySqlGrammar;
@@ -12,7 +10,7 @@ class MysqlInsertIgnore extends MySqlGrammar
     /**
      * Compile an insert statement into SQL.
      *
-     * @param \Illuminate\Database\Query\Builder $query
+     * @param Builder $query
      * @param array $values
      * @return string
      */

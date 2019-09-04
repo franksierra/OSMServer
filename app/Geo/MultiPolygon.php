@@ -6,9 +6,6 @@ use Illuminate\Support\Arr;
 
 class MultiPolygon
 {
-    const IS_OK = 0;
-    const IS_OPEN = 1;
-    const IS_EMPTY = 2;
 
     public $id = null;
     /** @var Way[] $ways */
@@ -45,10 +42,6 @@ class MultiPolygon
         /**
          * This is to fix a problem with OSM relations where some ways are out of order
          */
-//        shuffle($this->ways);
-        /**
-         * Last item search
-         */
         $non_matched_ways = 0;
         do {
             if ($this->polygon->isEmpty()) {
@@ -57,11 +50,6 @@ class MultiPolygon
                 $link = $this->polygon->getLastWay()->getLastNode()->id;
                 $match = $this->getMatchingWayIdFirst($link);
                 if ($match['position'] == 'none') {
-                    // Itself?
-//                if ($way->getFirstNode()->id == $way->getLastNode()->id) {
-//                    $this->polygon->addWay($way);
-//                } else {
-//                }
                     $non_matched_ways++;
                 } else {
                     $way = Arr::get($this->ways, $match['way']);
@@ -77,9 +65,6 @@ class MultiPolygon
             $this->polygons[] = $this->polygon;
         }
         $this->open_ways = $this->ways;
-        if (count($this->ways) > 0 && count($this->ways) < 0) {
-            $o = 0;
-        }
         unset($this->polygon);
     }
 
