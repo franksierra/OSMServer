@@ -41,9 +41,9 @@ class CreateWaysTable extends Migration
             $table->bigInteger("node_id", false, true);
             $table->bigInteger("sequence");
 
-            $table->index("way_id","way_id");
-            $table->index("node_id","node_id");
-            $table->unique(['way_id', 'node_id'], 'unique_way_id_node_id');
+            $table->index("way_id", "way_id");
+            $table->index("node_id", "node_id");
+            $table->unique(['way_id', 'node_id', 'sequence'], 'way_nodes_uniqueness');
         });
     }
 

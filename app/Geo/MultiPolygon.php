@@ -2,11 +2,25 @@
 
 namespace App\Geo;
 
+use Illuminate\Support\Arr;
+
 class MultiPolygon
 {
+    const IS_OK = 0;
+    const IS_OPEN = 1;
+    const IS_EMPTY = 2;
+
     public $id = null;
+    /** @var Way[] $ways */
+    public $ways = [];
+
+    /** @var Polygon[] $ways */
     public $polygons = [];
+    /** @var Polygon[] $ways */
     public $polygon;
+
+    public $open_ways = [];
+    public $empty_ways = [];
 
     public function __construct($id)
     {
@@ -16,42 +30,92 @@ class MultiPolygon
 
     /**
      * @param Way $way
-     * @return bool
      */
     public function addWay($way)
     {
-        $open_way = false;
-        if (!$this->polygon->isClosed()) {
-            if (!$way->isEmpty()) {
-                if ($this->polygon->isEmpty()) {
-                    $this->polygon->addWay($way);
+        if ($way->isEmpty()) {
+            $this->empty_ways[$way->id] = $way->id;
+        } else {
+            $this->ways[$way->id] = $way;
+        }
+    }
+
+    public function finishPolygon()
+    {
+        /**
+         * This is to fix a problem with OSM relations where some ways are out of order
+         */
+//        shuffle($this->ways);
+        /**
+         * Last item search
+         */
+        $non_matched_ways = 0;
+        do {
+            if ($this->polygon->isEmpty()) {
+                $this->addPolygonWay(Arr::first($this->ways));
+            } else {
+                $link = $this->polygon->getLastWay()->getLastNode()->id;
+                $match = $this->getMatchingWayIdFirst($link);
+                if ($match['position'] == 'none') {
+                    // Itself?
+//                if ($way->getFirstNode()->id == $way->getLastNode()->id) {
+//                    $this->polygon->addWay($way);
+//                } else {
+//                }
+                    $non_matched_ways++;
                 } else {
-                    if ($this->polygon->getLastWay()->getLastNode()->id == $way->getFirstNode()->id) {
-                        // OK
-                    } elseif ($this->polygon->getLastWay()->getLastNode()->id == $way->getLastNode()->id) {
+                    $way = Arr::get($this->ways, $match['way']);
+                    if ($match['position'] == 'last') {
                         $way->reverse();
-                    } elseif ($this->polygon->getFirstWay()->getFirstNode()->id == $way->getLastNode()->id) {
-                        $this->polygon->reverse();
-                        $way->reverse();
-                    } else {
-                        $open_way = true;
                     }
-                    $this->polygon->addWay($way);
+                    $this->addPolygonWay($way);
                 }
             }
+        } while (count($this->ways) > $non_matched_ways);
+
+        if ($this->polygon->isClosed()) {
+            $this->polygons[] = $this->polygon;
+        }
+        $this->open_ways = $this->ways;
+        if (count($this->ways) > 0 && count($this->ways) < 0) {
+            $o = 0;
+        }
+        unset($this->polygon);
+    }
+
+    private function addPolygonWay($way)
+    {
+        if ($way != null) {
+            $this->polygon->addWay($way);
+            Arr::forget($this->ways, $way->id);
         }
         if ($this->polygon->isClosed()) {
             $this->polygons[] = $this->polygon;
             $this->polygon = new Polygon();
         }
-        return $open_way;
     }
 
-    public function finishPolygon()
+    private function getMatchingWayIdFirst($node_id)
     {
-        if (!$this->polygon->isEmpty()) {
-            $this->polygons[] = $this->polygon;
+        $position = 'none';
+        $id = null;
+        foreach ($this->ways as $index => $way) {
+
+            if ($way->getFirstNode()->id == $node_id) {
+                $position = 'first';
+                $id = $index;
+                break;
+            } elseif ($way->getLastNode()->id == $node_id) {
+                $position = 'last';
+                $id = $index;
+                break;
+            }
         }
-        unset($this->polygon);
+        return [
+            'position' => $position,
+            'way' => $id,
+        ];
     }
+
+
 }

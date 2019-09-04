@@ -30,7 +30,7 @@ class CreateRelationsTable extends Migration
             $table->string("k", 191);
             $table->string("v");
 
-            $table->index("relation_id","relation_id");
+            $table->index("relation_id", "relation_id");
             $table->unique(['relation_id', 'k'], 'unique_relation_id_k');
         });
 
@@ -39,12 +39,15 @@ class CreateRelationsTable extends Migration
             $table->bigInteger("relation_id", false, true);
             $table->enum("member_type", ["node", "way", "relation"]);
             $table->bigInteger("member_id", false, true);
-            $table->string("member_role");
+            $table->string("member_role", 191);
             $table->bigInteger("sequence");
 
-            $table->index("relation_id","relation_id");
-            $table->index("member_id","member_id");
-            $table->unique(['relation_id', 'member_id'], 'unique_relation_id_member_id');
+            $table->index("relation_id", "relation_id");
+            $table->index("member_id", "member_id");
+            $table->unique(
+                ['relation_id', 'member_type', 'member_id', 'member_role', 'sequence'],
+                'relation_members_uniqueness'
+            );
         });
 
 

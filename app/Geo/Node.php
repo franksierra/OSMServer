@@ -10,7 +10,6 @@ class Node
     public $latitude; // X Lat
     public $longitude; // Y Lon
     public $sequence;
-    public $tags = [];
 
     public function __construct($id, $latitude, $longitude, $sequence)
     {

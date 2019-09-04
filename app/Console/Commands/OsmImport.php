@@ -3,10 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Database\Query\Grammars\MysqlInsertIgnore;
-use App\Jobs\ProcessElements;
 use App\Models\OSM\Node;
 use App\Models\OSM\NodeTag;
-use App\Models\OSM\OsmImports;
+use App\Models\OsmImports;
 use App\Models\OSM\Relation;
 use App\Models\OSM\RelationMember;
 use App\Models\OSM\RelationTag;

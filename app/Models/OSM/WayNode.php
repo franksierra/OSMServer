@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\WayNode whereSequence($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\WayNode whereWayId($value)
  * @mixin \Eloquent
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\Node[] $nodes
  */
 class WayNode extends Model
 {

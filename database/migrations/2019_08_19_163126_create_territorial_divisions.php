@@ -17,8 +17,12 @@ class CreateTerritorialDivisions extends Migration
             $table->bigInteger("relation_id", false)->primary();
             $table->bigInteger('parent_relation_id');
             $table->string('name');
-            $table->multiPolygon("geometry")->nullable();
+            $table->integer('admin_level');
+            $table->geometry("geometry");
+
+            $table->spatialIndex('geometry');
         });
+
     }
 
     /**
