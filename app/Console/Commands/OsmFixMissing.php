@@ -16,14 +16,14 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use OSMPBF\OSMReader;
 
-class OsmFixMissingWays extends Command
+class OsmFixMissing extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'osm:fixways';
+    protected $signature = 'osm:fix-missing';
 
     /**
      * The console command description.
@@ -49,18 +49,14 @@ class OsmFixMissingWays extends Command
      */
     public function handle()
     {
-        $adminLevels = RelationTag::where('k', '=', 'admin_level')
+        $territories = RelationTag::where('k', '=', 'admin_level')
             ->whereIn('v', [2])
             ->orderBy('relation_id', 'ASC')->get();
-        foreach ($adminLevels as $adminLevel) {
-            $geometry = OSM::relationGeometry($adminLevel->relation->id);
-            foreach ($geometry[''] as $item) {
-
-            }
+        foreach ($territories as $territory) {
+            $geometry = OSM::relationGeometry($territory->relation->id);
 
 
         }
-        //WIP:
 
         return true;
     }
