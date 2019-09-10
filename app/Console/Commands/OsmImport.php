@@ -16,6 +16,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
+use Illuminate\Support\Str;
 use OsmPbf\Reader;
 
 class OsmImport extends Command
@@ -36,6 +37,7 @@ class OsmImport extends Command
 
     private $storagePath = '';
     private $inputfolder = 'OsmImport/';
+    private $outputfolder = 'OsmExport/';
     private $counts = [
         "node" => 0,
         "node_tags" => 0,
@@ -45,6 +47,16 @@ class OsmImport extends Command
         "relation" => 0,
         "relation_tags" => 0,
         "relation_members" => 0,
+    ];
+    private $handlers = [
+        "nodes" => null,
+        "node_tags" => null,
+        "ways" => null,
+        "way_tags" => null,
+        "way_nodes" => null,
+        "relations" => null,
+        "relation_tags" => null,
+        "relation_members" => null,
     ];
 
     /**
@@ -75,30 +87,32 @@ class OsmImport extends Command
             $this->error('The file ' . $full_file_name . " does not exist!");
             return false;
         };
+        $this->outputfolder .= $country . "/";
+        Storage::disk('local')->deleteDirectory($this->outputfolder);
+        Storage::disk('local')->makeDirectory($this->outputfolder);
+        foreach ($this->handlers as $entity => &$handler) {
+            $file_name = Storage::disk('local')->path($this->outputfolder . $entity . ".sql");
+            $handler = fopen($file_name, "a+");
+            if (!$handler) {
+                return false;
+            }
+        }
+
         $file_handler = fopen($full_file_name, "rb");
         $pbfreader = new Reader($file_handler);
-
         $file_header = $pbfreader->readFileHeader();
-        $bbox_left = 0.000000001 * $file_header->getBbox()->getLeft();
-        $bbox_bottom = 0.000000001 * $file_header->getBbox()->getBottom();
-        $bbox_right = 0.000000001 * $file_header->getBbox()->getRight();
-        $bbox_top = 0.000000001 * $file_header->getBbox()->getTop();
-
-        $replication_timestamp = $file_header->getOsmosisReplicationTimestamp();
-        $replication_sequence = $file_header->getOsmosisReplicationSequenceNumber();
-        $replication_url = $file_header->getOsmosisReplicationBaseUrl();
-
-        OsmImports::create([
+        $sql = $this->getQuery('osm_imports', [
             'country' => $country,
-            'bbox_left' => $bbox_left,
-            'bbox_bottom' => $bbox_bottom,
-            'bbox_right' => $bbox_right,
-            'bbox_top' => $bbox_top,
-            'replication_timestamp' => $replication_timestamp,
-            'replication_sequence' => $replication_sequence,
-            'replication_url' => $replication_url
+            'bbox_left' => $file_header->getBbox()->getLeft() * 0.000000001,
+            'bbox_bottom' => $file_header->getBbox()->getBottom() * 0.000000001,
+            'bbox_right' => $file_header->getBbox()->getRight() * 0.000000001,
+            'bbox_top' => $file_header->getBbox()->getTop() * 0.000000001,
+            'replication_timestamp' => $file_header->getOsmosisReplicationTimestamp(),
+            'replication_sequence' => $file_header->getOsmosisReplicationSequenceNumber(),
+            'replication_url' => $file_header->getOsmosisReplicationBaseUrl()
         ]);
-        DB::connection()->setQueryGrammar(new MysqlInsertIgnore());
+        Storage::append($this->outputfolder . 'osm_imports' . '.sql', $sql . "\n");
+
         $reader = $pbfreader->getReader();
 
         $total = $reader->getEofPosition();
@@ -107,7 +121,8 @@ class OsmImport extends Command
         while ($pbfreader->next()) {
             $current = $reader->getPosition();
             $this->output->progressAdvance($current - $last_position);
-            $this->insertElements($pbfreader->getElements());
+            $elements = $pbfreader->getElements();
+            $this->insertElements($elements);
             $last_position = $current;
         }
         $this->output->progressFinish();
@@ -179,30 +194,46 @@ class OsmImport extends Command
                 ];
             }
         }
-        /** @var Node|Way|Relation $elementObjName */
-        $elementObjName = "App\\Models\\OSM\\" . ucfirst($type);
-        /** @var NodeTag|WayTag|RelationTag $elementTagName */
-        $elementTagName = "App\\Models\\OSM\\" . ucfirst($type) . "Tag";
-
         $chunk_size = 6550;
         foreach (array_chunk($records, $chunk_size) as $chunk) {
             $this->counts[$type] += count($chunk);
-            $elementObjName::insert($chunk);
+            $sql = $this->getQuery(Str::plural($type), $chunk) . "\n";
+            fwrite($this->handlers[Str::plural($type)], $sql);
         }
 
         foreach (array_chunk($tags, $chunk_size) as $chunk) {
             $this->counts[$type . "_tags"] += count($chunk);
-            $elementTagName::insert($chunk);
+            $sql = $this->getQuery($type . "_tags", $chunk) . "\n";
+            fwrite($this->handlers[$type . "_tags"], $sql);
         }
 
         foreach (array_chunk($nodes, $chunk_size) as $chunk) {
             $this->counts["way_nodes"] += count($chunk);
-            WayNode::insert($chunk);
+            $sql = $this->getQuery('way_nodes', $chunk) . "\n";
+            fwrite($this->handlers['way_nodes'], $sql);
         }
 
         foreach (array_chunk($relations, $chunk_size) as $chunk) {
             $this->counts["relation_members"] += count($chunk);
-            RelationMember::insert($chunk);
+            $sql = $this->getQuery('relation_members', $chunk) . "\n";
+            fwrite($this->handlers['relation_members'], $sql);
         }
     }
+
+
+    private function getQuery($table_name, $values)
+    {
+        $table = DB::table($table_name);
+        if (!is_array(reset($values))) {
+            $values = [$values];
+        }
+        $columns = $table->getGrammar()->columnize(array_keys(reset($values)));
+        $parameters = collect($values)->map(function ($record) use ($table) {
+            $record = array_map('addslashes', $record);
+            return '(' . $table->getGrammar()->quoteString($record) . ')';
+        })->implode(', ');
+        return "insert ignore into $table_name ($columns) values $parameters;";
+    }
+
+
 }
