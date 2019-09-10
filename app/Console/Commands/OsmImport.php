@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Database\Query\Grammars\MysqlInsertIgnore;
 use App\Models\OSM\Node;
 use App\Models\OSM\NodeTag;
 use App\Models\OsmImports;
