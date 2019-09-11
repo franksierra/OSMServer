@@ -6,6 +6,7 @@ namespace App\Geo;
 use Grimzy\LaravelMysqlSpatial\Types\LineString;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class OSM
 {
@@ -77,6 +78,69 @@ class OSM
         }
         return new \Grimzy\LaravelMysqlSpatial\Types\MultiPolygon($polygons);
 
+    }
+
+    public static function processElements($elements)
+    {
+        $type = $elements['type'];
+        $tags = [];
+        $nodes = [];
+        $relations = [];
+
+        foreach ($elements['data'] as &$element) {
+            if (isset($element["timestamp"])) {
+                $element["timestamp"] = str_replace("T", " ", $element["timestamp"]);
+                $element["timestamp"] = str_replace("Z", "", $element["timestamp"]);
+            }
+            foreach ($element["tags"] as $tag) {
+                $tags[] = [
+                    $type . "_id" => $element["id"],
+                    "k" => $tag["key"],
+                    "v" => $tag["value"]
+                ];
+            }
+            foreach ($element["nodes"] as $node) {
+                $nodes[] = [
+                    $type . "_id" => $element["id"],
+                    "node_id" => $node["id"],
+                    "sequence" => $node["sequence"]
+                ];
+            }
+
+            foreach ($element["relations"] as $relation) {
+                $relations[] = [
+                    $type . "_id" => $element["id"],
+                    "member_type" => $relation["member_type"],
+                    "member_id" => $relation["member_id"],
+                    "member_role" => $relation["member_role"],
+                    "sequence" => $relation["sequence"]
+                ];
+            }
+            unset($element["tags"], $element["nodes"], $element["relations"]);
+        }
+
+        return [
+            'type' => $elements['type'],
+            'records' => $elements['data'],
+            'tags' => $tags,
+            'nodes' => $nodes,
+            'relations' => $relations,
+        ];
+
+    }
+
+    public static function getQuery($table_name, $values)
+    {
+        $table = DB::table($table_name);
+        if (!is_array(reset($values))) {
+            $values = [$values];
+        }
+        $columns = $table->getGrammar()->columnize(array_keys(reset($values)));
+        $parameters = collect($values)->map(function ($record) use ($table) {
+            $record = array_map('addslashes', $record);
+            return '(' . $table->getGrammar()->quoteString($record) . ')';
+        })->implode(', ');
+        return "insert ignore into $table_name ($columns) values $parameters;";
     }
 
 }
