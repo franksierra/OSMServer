@@ -7,6 +7,7 @@ use App\Geo\OSM;
 use App\Models\OSM\RelationTag;
 use App\Models\TerritorialDivision;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 
 class OsmAdminLevels extends Command
@@ -42,6 +43,7 @@ class OsmAdminLevels extends Command
      */
     public function handle()
     {
+        Config::set('app.debug', false);
 
         DB::table('territorial_divisions')->truncate();
         $territories = RelationTag::where('k', '=', 'admin_level')
