@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Geo\OSM;
+use App\Models\OsmImports;
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use OsmPbf\Reader;
@@ -15,7 +17,7 @@ class OsmImport extends Command
      *
      * @var string
      */
-    protected $signature = 'osm:import {country} {filename}';
+    protected $signature = 'osm:import';
 
     /**
      * The console command description.
@@ -65,9 +67,11 @@ class OsmImport extends Command
     public function handle()
     {
         Storage::disk('local')->makeDirectory($this->inputfolder);
+        $files = Storage::disk('local')->allFiles($this->inputfolder);
+        Arr::
 
+        dd();
         $start_time = time();
-        $country = $this->argument('country');
         $filename = $this->argument('filename');
         $filepath = Storage::disk('local')->path($this->inputfolder . $filename);;
         if (!Storage::disk('local')->exists($this->inputfolder . $filename)) {
@@ -75,9 +79,21 @@ class OsmImport extends Command
             return false;
         };
 
-        $this->outputfolder .= $country . "/";
+        $filehandler = fopen($filepath, "rb");
+        $pbfreader = new Reader($filehandler);
+        $file_header = $pbfreader->readFileHeader();
 
-
+        $import = new OsmImports([
+            'bbox_left' => $file_header->getBbox()->getLeft() * 0.000000001,
+            'bbox_bottom' => $file_header->getBbox()->getBottom() * 0.000000001,
+            'bbox_right' => $file_header->getBbox()->getRight() * 0.000000001,
+            'bbox_top' => $file_header->getBbox()->getTop() * 0.000000001,
+            'replication_timestamp' => $file_header->getOsmosisReplicationTimestamp(),
+            'replication_sequence' => $file_header->getOsmosisReplicationSequenceNumber(),
+            'replication_url' => $file_header->getOsmosisReplicationBaseUrl()
+        ]);
+        $id = $import->save();
+        $this->outputfolder .= $import->id . "/";
         Storage::disk('local')->deleteDirectory($this->outputfolder);
         Storage::disk('local')->makeDirectory($this->outputfolder);
 
@@ -88,21 +104,6 @@ class OsmImport extends Command
                 return false;
             }
         }
-
-        $filehandler = fopen($filepath, "rb");
-        $pbfreader = new Reader($filehandler);
-        $file_header = $pbfreader->readFileHeader();
-        $sql = OSM::getQuery('osm_imports', [
-            'country' => $country,
-            'bbox_left' => $file_header->getBbox()->getLeft() * 0.000000001,
-            'bbox_bottom' => $file_header->getBbox()->getBottom() * 0.000000001,
-            'bbox_right' => $file_header->getBbox()->getRight() * 0.000000001,
-            'bbox_top' => $file_header->getBbox()->getTop() * 0.000000001,
-            'replication_timestamp' => $file_header->getOsmosisReplicationTimestamp(),
-            'replication_sequence' => $file_header->getOsmosisReplicationSequenceNumber(),
-            'replication_url' => $file_header->getOsmosisReplicationBaseUrl()
-        ]);
-        Storage::append($this->outputfolder . 'osm_imports' . '.sql', $sql . "\n");
 
         $reader = $pbfreader->getReader();
 

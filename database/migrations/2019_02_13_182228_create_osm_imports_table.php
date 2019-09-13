@@ -15,7 +15,6 @@ class CreateOsmImportsTable extends Migration
     {
         Schema::create('osm_imports', function (Blueprint $table) {
             $table->bigInteger("id", true);
-            $table->string("country", 2);
 
             $table->decimal("bbox_left", 13, 10);
             $table->decimal("bbox_bottom", 13, 10);
@@ -24,7 +23,7 @@ class CreateOsmImportsTable extends Migration
 
             $table->bigInteger("replication_timestamp");
             $table->integer("replication_sequence", false, true);
-            $table->string("replication_url");
+            $table->string("replication_url")->unique();
 
             $table->timestamps();
         });
