@@ -135,12 +135,16 @@ class OSM
         if (!is_array(reset($values))) {
             $values = [$values];
         }
-        $columns = $table->getGrammar()->columnize(array_keys(reset($values)));
+        $columns = '(' . $table->getGrammar()->columnize(array_keys(reset($values))) . ')';
         $parameters = collect($values)->map(function ($record) use ($table) {
             $record = array_map('addslashes', $record);
             return '(' . $table->getGrammar()->quoteString($record) . ')';
         })->implode(', ');
-        return "insert ignore into $table_name ($columns) values $parameters;";
+
+        $sql = $table->getGrammar()->compileInsertOrIgnore($table, []);
+        $sql = Str::replaceFirst('()', $columns, $sql);
+        $sql = Str::replaceFirst('()', $parameters, $sql);
+        return $sql;
     }
 
 }

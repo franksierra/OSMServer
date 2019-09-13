@@ -39,31 +39,33 @@ class MultiPolygon
 
     public function finishPolygon()
     {
-        /**
-         * This is to fix a problem with OSM relations where some ways are out of order
-         */
-        $non_matched_ways = 0;
-        do {
-            if ($this->polygon->isEmpty()) {
-                $this->addPolygonWay(Arr::first($this->ways));
-            } else {
-                $link = $this->polygon->getLastWay()->getLastNode()->id;
-                $match = $this->getMatchingWayIdFirst($link);
-                if ($match['position'] == 'none') {
-                    $non_matched_ways++;
+        if (count($this->empty_ways) == 0) {
+            /**
+             * This is to fix a problem with OSM relations where some ways are out of order
+             */
+            $non_matched_ways = 0;
+            do {
+                if ($this->polygon->isEmpty()) {
+                    $this->addPolygonWay(Arr::first($this->ways));
                 } else {
-                    $way = Arr::get($this->ways, $match['way']);
-                    if ($match['position'] == 'last') {
-                        $way->reverse();
+                    $link = $this->polygon->getLastWay()->getLastNode()->id;
+                    $match = $this->getMatchingWayIdFirst($link);
+                    if ($match['position'] == 'none') {
+                        $non_matched_ways++;
+                    } else {
+                        $way = Arr::get($this->ways, $match['way']);
+                        if ($match['position'] == 'last') {
+                            $way->reverse();
+                        }
+                        $this->addPolygonWay($way);
                     }
-                    $this->addPolygonWay($way);
                 }
+            } while (count($this->ways) > $non_matched_ways);
+            if ($this->polygon->isClosed()) {
+                $this->polygons[] = $this->polygon;
             }
-        } while (count($this->ways) > $non_matched_ways);
-
-        if ($this->polygon->isClosed()) {
-            $this->polygons[] = $this->polygon;
         }
+
         $this->open_ways = $this->ways;
         unset($this->polygon);
     }
