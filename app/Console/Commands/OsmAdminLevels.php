@@ -43,15 +43,15 @@ class OsmAdminLevels extends Command
      */
     public function handle()
     {
-        Config::set('app.debug', false);
-
         DB::table('territorial_divisions')->truncate();
         $territories = RelationTag::where('k', '=', 'admin_level')
             ->orderBy('relation_id', 'ASC')->get();
+
+        $this->output->progressStart(count($territories));
         foreach ($territories as $territory) {
             $level = $territory->v;
             $tags = $territory->relation->tags()->where('k', '=', 'name')->first();
-            $name = $tags->v;
+            $name = $tags->v ?? '';
             $geometry = OSM::relationGeometry($territory->relation->id);
             if ($geometry != null && count($geometry->empty_ways) == 0 && count($geometry->polygons) > 0) {
                 $multiPolygon = OSM::toSpatial($geometry);
@@ -63,7 +63,10 @@ class OsmAdminLevels extends Command
                     'geometry' => $multiPolygon
                 ]);
             }
+            $this->output->progressAdvance(1);
         }
+        $this->output->progressFinish();
+        return true;
 
         TerritorialDivision::where('admin_level', '=', 2)->update(['parent_relation_id' => 0]);
         $admin_levels = TerritorialDivision::groupBy('admin_level')

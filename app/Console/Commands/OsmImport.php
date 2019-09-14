@@ -6,9 +6,12 @@ use App\Geo\OSM;
 use App\Models\OsmImports;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use OsmPbf\Reader;
+use Symfony\Component\Finder\Finder;
+use function foo\func;
 
 class OsmImport extends Command
 {
@@ -27,7 +30,7 @@ class OsmImport extends Command
     protected $description = 'Imports an OSM file into the database';
 
     private $inputfolder = 'OsmImport/';
-    private $outputfolder = 'OsmExport/';
+    private $outputfolder = 'OsmImportSQL/';
     private $counts = [
         "node" => 0,
         "node_tags" => 0,
@@ -66,14 +69,19 @@ class OsmImport extends Command
      */
     public function handle()
     {
-        Storage::disk('local')->makeDirectory($this->inputfolder);
-        $files = Storage::disk('local')->allFiles($this->inputfolder);
-        Arr::
-
-        dd();
+        $path = Storage::path($this->inputfolder);
+        $files = File::glob("{$path}*.osm.pbf");
+        $this->output->writeln("List of files available to process");
+        foreach ($files as $i => $item) {
+            $this->output->writeln($i + 1 . ') ' . Str::replaceFirst($path, '', $item));
+        }
+        $fileindex = $this->ask("Chose the file you want to extract");
+        if (!is_numeric($fileindex) || $fileindex < 1 || $fileindex > count($files)) {
+            $this->output->writeln("Invalid value it must be a number between 1 and " . count($files));
+        }
         $start_time = time();
-        $filename = $this->argument('filename');
-        $filepath = Storage::disk('local')->path($this->inputfolder . $filename);;
+        $filename = File::basename($files[$fileindex - 1]);
+        $filepath = Storage::disk('local')->path($this->inputfolder . $filename);
         if (!Storage::disk('local')->exists($this->inputfolder . $filename)) {
             $this->error('The file ' . $filepath . " does not exist!");
             return false;
@@ -83,30 +91,28 @@ class OsmImport extends Command
         $pbfreader = new Reader($filehandler);
         $file_header = $pbfreader->readFileHeader();
 
-        $import = new OsmImports([
-            'bbox_left' => $file_header->getBbox()->getLeft() * 0.000000001,
-            'bbox_bottom' => $file_header->getBbox()->getBottom() * 0.000000001,
-            'bbox_right' => $file_header->getBbox()->getRight() * 0.000000001,
-            'bbox_top' => $file_header->getBbox()->getTop() * 0.000000001,
-            'replication_timestamp' => $file_header->getOsmosisReplicationTimestamp(),
-            'replication_sequence' => $file_header->getOsmosisReplicationSequenceNumber(),
-            'replication_url' => $file_header->getOsmosisReplicationBaseUrl()
-        ]);
-        $id = $import->save();
-        $this->outputfolder .= $import->id . "/";
+        $import = OsmImports::findOrNew($file_header->getOsmosisReplicationBaseUrl());
+        $import->bbox_left = $file_header->getBbox()->getLeft() * 0.000000001;
+        $import->bbox_bottom = $file_header->getBbox()->getBottom() * 0.000000001;
+        $import->bbox_right = $file_header->getBbox()->getRight() * 0.000000001;
+        $import->bbox_top = $file_header->getBbox()->getTop() * 0.000000001;
+        $import->replication_timestamp = $file_header->getOsmosisReplicationTimestamp();
+        $import->replication_sequence = $file_header->getOsmosisReplicationSequenceNumber();
+        $import->save();
+
+        $this->outputfolder .= $import->id . " - " . $filename . "/";
         Storage::disk('local')->deleteDirectory($this->outputfolder);
         Storage::disk('local')->makeDirectory($this->outputfolder);
 
         foreach ($this->handlers as $entity => &$handler) {
             $file_name = Storage::disk('local')->path($this->outputfolder . $entity . ".sql");
-            $handler = fopen($file_name, "a+");
+            $handler = fopen($file_name, "a + ");
             if (!$handler) {
                 return false;
             }
         }
 
         $reader = $pbfreader->getReader();
-
         $total = $reader->getEofPosition();
         $this->output->progressStart($total);
         $last_position = 0;

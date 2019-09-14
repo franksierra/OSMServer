@@ -144,7 +144,7 @@ class OSM
         $sql = $table->getGrammar()->compileInsertOrIgnore($table, []);
         $sql = Str::replaceFirst('()', $columns, $sql);
         $sql = Str::replaceFirst('()', $parameters, $sql);
-        return $sql;
+        return $sql . ';';
     }
 
 }
