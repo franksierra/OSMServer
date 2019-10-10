@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b657d1488351835b2d42cf6749d133ec",
+    "content-hash": "b4790fd1be76112ac367f1f897c69f8d",
     "packages": [
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -903,16 +903,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v6.0.1",
+            "version": "v6.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "f38711564c642ee88a58bf180010a0c7a7ab062e"
+                "reference": "a365bea7ff0dea9a50f5904be9e41656def9af4b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/f38711564c642ee88a58bf180010a0c7a7ab062e",
-                "reference": "f38711564c642ee88a58bf180010a0c7a7ab062e",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/a365bea7ff0dea9a50f5904be9e41656def9af4b",
+                "reference": "a365bea7ff0dea9a50f5904be9e41656def9af4b",
                 "shasum": ""
             },
             "require": {
@@ -1008,7 +1008,7 @@
                 "league/flysystem-sftp": "Required to use the Flysystem SFTP driver (^1.0).",
                 "moontoast/math": "Required to use ordered UUIDs (^1.1).",
                 "pda/pheanstalk": "Required to use the beanstalk queue driver (^4.0).",
-                "pusher/pusher-php-server": "Required to use the Pusher broadcast driver (^3.0).",
+                "pusher/pusher-php-server": "Required to use the Pusher broadcast driver (^4.0).",
                 "symfony/cache": "Required to PSR-6 cache bridge (^4.3.4).",
                 "symfony/psr-http-message-bridge": "Required to use PSR-7 bridging features (^1.2).",
                 "wildbit/swiftmailer-postmark": "Required to use Postmark mail driver (^3.0)."
@@ -1044,7 +1044,7 @@
                 "framework",
                 "laravel"
             ],
-            "time": "2019-09-05T20:31:10+00:00"
+            "time": "2019-10-01T13:55:56+00:00"
         },
         {
             "name": "laravel/tinker",
@@ -1985,6 +1985,51 @@
                 "uuid"
             ],
             "time": "2018-07-19T23:38:55+00:00"
+        },
+        {
+            "name": "sierrafayad/laravel-sphinxsearch",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "./packages/sierrafayad/laravel-sphinxsearch",
+                "reference": "47297d3c1955879a16f972c921d018ead6f79acb",
+                "shasum": null
+            },
+            "require": {
+                "ext-pdo": "*",
+                "illuminate/database": "~5.1|^6.0",
+                "illuminate/support": "~5.1|^6.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.2",
+                "orchestra/testbench-core": "^4.0",
+                "phpunit/phpunit": "^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "SierraFayad\\SphinxSearch\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Frank Sierra-Fayad",
+                    "email": "frank@sierrafayad.com"
+                }
+            ],
+            "homepage": "https://github.com/sierrafayad/laravel-sphinxsearch",
+            "support": {
+                "source": "https://github.com/sierrafayad/laravel-sphinxsearch",
+                "issues": "https://github.com/sierrafayad/laravel-sphinxsearch/issues"
+            }
         },
         {
             "name": "sierrafayad/osm-pbf",
@@ -6361,7 +6406,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "sierrafayad/laravel-sphinxsearch": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

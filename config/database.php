@@ -63,6 +63,15 @@ return [
             ]) : [],
         ],
 
+        'sphinx' => [
+            'driver' => 'sphinx',
+            'host' => env('SPHINX_HOST', '127.0.0.1'),
+            'port' => env('SPHINX_PORT', '9306'),
+            'database' => '',
+            'username' => env('SPHINX_USERNAME', ''),
+            'password' => env('SPHINX_PASSWORD', ''),
+        ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DATABASE_URL'),

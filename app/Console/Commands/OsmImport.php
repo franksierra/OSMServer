@@ -111,6 +111,7 @@ class OsmImport extends Command
                 return false;
             }
         }
+        OsmImports::create();
 
         $reader = $pbfreader->getReader();
         $total = $reader->getEofPosition();

@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\OSM\Node as OSMNode;
+use App\Models\OSM\Way as OSMWay;
+use App\Models\OSM\Relation as OSMRelation;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
@@ -25,9 +28,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Relation::morphMap([
-            'node' => "App\Models\OSM\Node",
-            'way' => "App\Models\OSM\Way",
-            'relation' => "App\Models\OSM\Relation",
+            'node' => OSMNode::class,
+            'way' => OSMWay::class,
+            'relation' => OSMRelation::class,
         ]);
     }
 }

@@ -24,7 +24,8 @@ use test\Mockery\ReturnTypeObjectTypeHint;
  * @property int $version
  * @property int $uid
  * @property string $user
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\NodeTag[] $tags
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\RelationTag[] $tags
+ * @property-read int|null $tags_count
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node query()
@@ -38,11 +39,11 @@ use test\Mockery\ReturnTypeObjectTypeHint;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node whereVersion($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Node whereVisible($value)
  * @mixin \Eloquent
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\Relation[] $relations
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\Way[] $ways
  */
 class Node extends Model
 {
+    protected $connection = 'sphinx';
+
     public $incrementing = false;
     public $timestamps = false;
 
@@ -56,5 +57,10 @@ class Node extends Model
         'version',
         'user'
     ];
+
+    public function tags()
+    {
+        return $this->hasMany(RelationTag::class);
+    }
 
 }

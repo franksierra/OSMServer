@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $node_id
  * @property string $k
  * @property string $v
- * @property-read \App\Models\OSM\Node $node
+ * @property-read \App\Models\OSM\Node $nodes
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\NodeTag newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\NodeTag newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\NodeTag query()
@@ -35,5 +35,10 @@ class NodeTag extends Model
         'k',
         'v'
     ];
+
+    public function nodes()
+    {
+        return $this->belongsTo(Node::class);
+    }
 
 }

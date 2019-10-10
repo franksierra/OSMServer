@@ -21,8 +21,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $version
  * @property int $uid
  * @property string $user
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\WayNode[] $nodes
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\WayTag[] $tags
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\Node[] $nodes
+ * @property-read int|null $nodes_count
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Way newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Way newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Way query()
@@ -34,7 +34,6 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Way whereVersion($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Way whereVisible($value)
  * @mixin \Eloquent
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\Relation[] $relations
  */
 class Way extends Model
 {

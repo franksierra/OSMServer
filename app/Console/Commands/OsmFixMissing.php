@@ -3,12 +3,15 @@
 namespace App\Console\Commands;
 
 use App\Geo\OSM;
+use App\Models\OSM\Node;
 use App\Models\OSM\RelationTag;
+use App\Models\OSM\Way;
+use App\Models\OSM\WayNode;
+use App\Models\OSM\WayTag;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class OsmFixMissing extends Command
 {
@@ -85,96 +88,70 @@ class OsmFixMissing extends Command
 
     private function fixWay($data)
     {
-        $nodes =
-
-
         $xml = simplexml_load_string($data);
         $json = str_replace('@', '', json_encode($xml));
         $json = json_decode($json);
         unset($json->attributes);
-        foreach ($json->node as $item) {
-
-        }
-
-
-
-        foreach ($json->node as $item) {
-            $data = $this->proccess($item);
-//            $this->makeEntity('node', $data);
+        foreach ($json->node ?? [] as $item) {
+            $element = [
+                'id' => $item->attributes->id,
+                'latitude' => $item->attributes->lat,
+                'longitude' => $item->attributes->lon,
+                'changeset_id' => $item->attributes->changeset,
+                'visible' => ($item->attributes->visible ?? "") == "true" ? 1 : 0,
+                'timestamp' => $item->attributes->timestamp,
+                'version' => $item->attributes->version,
+                'uid' => $item->attributes->uid,
+                'user' => $item->attributes->user,
+            ];
+            $element["timestamp"] = str_replace("T", " ", $element["timestamp"]);
+            $element["timestamp"] = str_replace("Z", "", $element["timestamp"]);
+            Node::insertOrIgnore($element);
         }
         if (!is_array($json->way)) {
-            $data = $this->proccess($json->way);
-//            $this->makeEntity('way', $data);
+            $element = [
+                'id' => $json->way->attributes->id,
+                'changeset_id' => $json->way->attributes->changeset,
+                'visible' => ($json->way->attributes->visible ?? "") == "true" ? 1 : 0,
+                'timestamp' => $json->way->attributes->timestamp,
+                'version' => $json->way->attributes->version,
+                'uid' => $json->way->attributes->uid,
+                'user' => $json->way->attributes->user,
+            ];
+            $element["timestamp"] = str_replace("T", " ", $element["timestamp"]);
+            $element["timestamp"] = str_replace("Z", "", $element["timestamp"]);
+            Way::insertOrIgnore($element);
+
+            foreach ($json->way->tag ?? [] as $tag) {
+                if (isset($tag->attributes)) {
+                    $way_tag = [
+                        'way_id' => $element['id'],
+                        'k' => $tag->attributes->k,
+                        'v' => $tag->attributes->v
+                    ];
+                    WayTag::insert($way_tag);
+                } else {
+                    $way_tag = [
+                        'way_id' => $element['id'],
+                        "k" => $tag->k,
+                        "v" => $tag->v
+                    ];
+                    WayTag::insert($way_tag);
+                }
+            }
+            $sequence = 0;
+            foreach ($json->way->nd ?? [] as $node) {
+                $way_node = [
+                    'way_id' => $element['id'],
+                    'node_id' => $node->attributes->ref,
+                    'sequence' => $sequence
+                ];
+                WayNode::insertOrIgnore($way_node);
+                $sequence++;
+            }
         } else {
-            foreach ($json->way as $item) {
-                $data = $this->proccess($item);
-//                $this->makeEntity('way', $data);
-            }
+            $o = 0;
         }
-
         return true;
-    }
-
-    private function proccess($json)
-    {
-        $attributes = $json->attributes;
-
-        $dirty_tags = $json->tag ?? [];
-        $tags = [];
-        foreach ($dirty_tags as $item) {
-            if (isset($item->attributes)) {
-                $tags[] = [
-                    "key" => $item->attributes->k,
-                    "value" => $item->attributes->v
-                ];
-            } else {
-                $tags[] = [
-                    "key" => $item->k,
-                    "value" => $item->v
-                ];
-            }
-        }
-
-        $dirty_nodes = $json->nd ?? [];
-        $nodes = [];
-        $sequence = 0;
-        foreach ($dirty_nodes as $item) {
-            $nodes[] = [
-                "id" => $item->attributes->ref,
-                "sequence" => $sequence
-            ];
-            $sequence++;
-        }
-
-        $dirty_members = $json->member ?? [];
-        $members = [];
-        $sequence = 0;
-        foreach ($dirty_members as $item) {
-            $members[] = [
-                "member_type" => $item->attributes->type,
-                "member_id" => $item->attributes->ref,
-                "member_role" => $item->attributes->role,
-                "sequence" => $sequence,
-            ];
-            $sequence++;
-        }
-
-
-        $data = [
-            'id' => $attributes->id,
-            'latitude' => $attributes->lat ?? "",
-            'longitude' => $attributes->lon ?? "",
-            'changeset_id' => $attributes->changeset ?? "",
-            'visible' => ($attributes->visible ?? "") == "true" ? 1 : 0,
-            'timestamp' => $attributes->timestamp ?? "",
-            'version' => $attributes->version ?? "",
-            'uid' => $attributes->uid ?? "",
-            'user' => $attributes->user ?? "",
-            "tags" => $tags,
-            "nodes" => $nodes,
-            "relations" => $members
-        ];
-
-        return $data;
     }
 }

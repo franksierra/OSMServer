@@ -11,13 +11,13 @@ namespace App\Models\OSM;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * App\Models\OSM\NodeWay
+ * App\Models\OSM\WayNode
  *
- * @property int $node_id
  * @property int $way_id
+ * @property int $node_id
  * @property int $sequence
- * @property-read \App\Models\OSM\Node $node
- * @property-read \App\Models\OSM\Way $way
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\Node[] $nodes
+ * @property-read int|null $nodes_count
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\WayNode newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\WayNode newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\WayNode query()
@@ -25,7 +25,6 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\WayNode whereSequence($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\WayNode whereWayId($value)
  * @mixin \Eloquent
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\Node[] $nodes
  */
 class WayNode extends Model
 {

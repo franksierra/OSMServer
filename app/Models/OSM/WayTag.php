@@ -8,7 +8,6 @@
 
 namespace App\Models\OSM;
 
-
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -17,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $way_id
  * @property string $k
  * @property string $v
- * @property-read \App\Models\OSM\Way $tag
+ * @property-read \App\Models\OSM\Way $way
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\WayTag newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\WayTag newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\WayTag query()
@@ -25,7 +24,6 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\WayTag whereV($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\WayTag whereWayId($value)
  * @mixin \Eloquent
- * @property-read \App\Models\OSM\Way $way
  */
 class WayTag extends Model
 {
@@ -36,5 +34,10 @@ class WayTag extends Model
         'k',
         'v'
     ];
+
+    public function way()
+    {
+        return $this->belongsTo(Way::class);
+    }
 
 }

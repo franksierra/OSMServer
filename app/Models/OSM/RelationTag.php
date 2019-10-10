@@ -24,7 +24,6 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\RelationTag whereK($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\RelationTag whereRelationId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\RelationTag whereV($value)
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\RelationTag[] $otherTags
  * @mixin \Eloquent
  */
 class RelationTag extends Model

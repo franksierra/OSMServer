@@ -165,6 +165,7 @@ return [
         /*
          * Package Service Providers...
          */
+        \SierraFayad\SphinxSearch\SphinxSearchServiceProvider::class,
 
         /*
          * Application Service Providers...
