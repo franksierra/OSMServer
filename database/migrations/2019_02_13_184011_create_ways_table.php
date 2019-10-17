@@ -31,6 +31,7 @@ class CreateWaysTable extends Migration
             $table->string("v");
 
             $table->index("way_id", "way_id");
+            $table->index("k", "k");
             $table->unique(['way_id', 'k'], 'unique_way_id_k');
         });
 

@@ -33,6 +33,7 @@ class CreateNodesTable extends Migration
             $table->string("v");
 
             $table->index("node_id", "node_id");
+            $table->index("k", "k");
             $table->unique(['node_id', 'k'], 'unique_node_id_k');
         });
     }
