@@ -15,35 +15,35 @@ class CreateWaysTable extends Migration
     {
         Schema::create('ways', function (Blueprint $table) {
             $table->engine = 'MyISAM';
-            $table->bigInteger("id", false, true)->primary();
-            $table->bigInteger("changeset_id", false, true);
-            $table->boolean("visible");
-            $table->timestamp("timestamp");
-            $table->bigInteger("version", false, true);
-            $table->bigInteger("uid", false, true);
-            $table->string("user");
+            $table->unsignedBigInteger('id')->primary();
+            $table->unsignedBigInteger('changeset_id');
+            $table->boolean('visible');
+            $table->timestamp('timestamp');
+            $table->unsignedInteger('version');
+            $table->unsignedBigInteger('uid');
+            $table->string('user');
         });
 
         Schema::create('way_tags', function (Blueprint $table) {
             $table->engine = 'MyISAM';
-            $table->bigInteger("way_id", false, true)->nullable(false);
-            $table->string("k", 191);
-            $table->string("v");
+            $table->unsignedBigInteger('way_id')->nullable(false);
+            $table->string('k', 191);
+            $table->string('v');
 
-            $table->index("way_id", "way_id");
-            $table->index("k", "k");
+            $table->index('way_id', 'way_id');
+            $table->index('k', 'k');
             $table->unique(['way_id', 'k'], 'unique_way_id_k');
         });
 
 
         Schema::create('way_nodes', function (Blueprint $table) {
             $table->engine = 'MyISAM';
-            $table->bigInteger("way_id", false, true);
-            $table->bigInteger("node_id", false, true);
-            $table->bigInteger("sequence");
+            $table->unsignedBigInteger('way_id');
+            $table->unsignedBigInteger('node_id');
+            $table->unsignedInteger('sequence');
 
-            $table->index("way_id", "way_id");
-            $table->index("node_id", "node_id");
+            $table->index('way_id', 'way_id');
+            $table->index('node_id', 'node_id');
             $table->unique(['way_id', 'node_id', 'sequence'], 'way_nodes_uniqueness');
         });
     }

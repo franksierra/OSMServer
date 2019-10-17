@@ -42,11 +42,7 @@ use Illuminate\Database\Eloquent\Model;
 class OsmImports extends Model
 {
 
-    public $incrementing = false;
-    protected $primaryKey = 'replication_url';
-
     protected $fillable = [
-        'id',
         'bbox_left',
         'bbox_bottom',
         'bbox_right',

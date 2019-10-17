@@ -91,13 +91,16 @@ class OsmImport extends Command
         $pbfreader = new Reader($filehandler);
         $file_header = $pbfreader->readFileHeader();
 
-        $import = OsmImports::findOrNew($file_header->getOsmosisReplicationBaseUrl());
+        if(!$import=OsmImports::whereReplicationUrl($file_header->getOsmosisReplicationBaseUrl())->first()){
+            $import = new OsmImports();
+        }
         $import->bbox_left = $file_header->getBbox()->getLeft() * 0.000000001;
         $import->bbox_bottom = $file_header->getBbox()->getBottom() * 0.000000001;
         $import->bbox_right = $file_header->getBbox()->getRight() * 0.000000001;
         $import->bbox_top = $file_header->getBbox()->getTop() * 0.000000001;
         $import->replication_timestamp = $file_header->getOsmosisReplicationTimestamp();
         $import->replication_sequence = $file_header->getOsmosisReplicationSequenceNumber();
+        $import->replication_url = $file_header->getOsmosisReplicationBaseUrl();
         $import->save();
 
         $this->outputfolder .= $import->id . " - " . $filename . "/";
@@ -111,7 +114,6 @@ class OsmImport extends Command
                 return false;
             }
         }
-        OsmImports::create();
 
         $reader = $pbfreader->getReader();
         $total = $reader->getEofPosition();

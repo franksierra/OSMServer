@@ -42,8 +42,6 @@ use test\Mockery\ReturnTypeObjectTypeHint;
  */
 class Node extends Model
 {
-    protected $connection = 'sphinx';
-
     public $incrementing = false;
     public $timestamps = false;
 

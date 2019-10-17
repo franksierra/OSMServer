@@ -16,8 +16,8 @@ class CreateAppKeysTable extends Migration
         Schema::create('app_keys', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('app_id');
-            $table->enum("platform", ['android', 'ios', 'web', 'other']);
-            $table->string("key", 128);
+            $table->enum('platform', ['android', 'ios', 'web', 'other']);
+            $table->string('key', 128);
             $table->boolean('active')->default(1);
             $table->timestamps();
 

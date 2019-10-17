@@ -20,7 +20,7 @@ class OsmFixMissing extends Command
      *
      * @var string
      */
-    protected $signature = 'osm:fix-missing';
+    protected $signature = 'osm:fix';
 
     /**
      * The console command description.

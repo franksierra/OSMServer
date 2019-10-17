@@ -14,16 +14,16 @@ class CreateOsmImportsTable extends Migration
     public function up()
     {
         Schema::create('osm_imports', function (Blueprint $table) {
-            $table->bigInteger("id", true);
+            $table->bigIncrements('id');
+            $table->string('replication_url')->unique();
+            $table->unsignedBigInteger('replication_sequence');
+            $table->unsignedBigInteger('replication_timestamp');
 
-            $table->decimal("bbox_left", 13, 10);
-            $table->decimal("bbox_bottom", 13, 10);
-            $table->decimal("bbox_right", 13, 10);
-            $table->decimal("bbox_top", 13, 10);
+            $table->decimal('bbox_left', 13, 10);
+            $table->decimal('bbox_bottom', 13, 10);
+            $table->decimal('bbox_right', 13, 10);
+            $table->decimal('bbox_top', 13, 10);
 
-            $table->bigInteger("replication_timestamp");
-            $table->integer("replication_sequence", false, true);
-            $table->string("replication_url")->unique();
 
             $table->timestamps();
         });
