@@ -14,7 +14,6 @@ class CreateRelationsTable extends Migration
     public function up()
     {
         Schema::create('relations', function (Blueprint $table) {
-            $table->engine = 'MyISAM';
             $table->unsignedBigInteger('id')->primary();
             $table->unsignedBigInteger('changeset_id');
             $table->boolean('visible');
@@ -25,29 +24,27 @@ class CreateRelationsTable extends Migration
         });
 
         Schema::create('relation_tags', function (Blueprint $table) {
-            $table->engine = 'MyISAM';
             $table->unsignedBigInteger('relation_id')->nullable(false);
-            $table->string('k', 191);
+            $table->string('k');
             $table->string('v');
 
-            $table->index('relation_id', 'relation_id');
-            $table->unique(['relation_id', 'k'], 'unique_relation_id_k');
+            $table->unique(['relation_id', 'k'], 'relation_tags-unique_relation_id_k');
+            $table->index('relation_id', 'relation_tags-relation_id');
         });
 
         Schema::create('relation_members', function (Blueprint $table) {
-            $table->engine = 'MyISAM';
             $table->unsignedBigInteger('relation_id');
             $table->enum('member_type', ['node', 'way', 'relation']);
             $table->unsignedBigInteger('member_id');
-            $table->string('member_role', 191);
+            $table->string('member_role');
             $table->unsignedInteger('sequence');
 
-            $table->index('relation_id', 'relation_id');
-            $table->index('member_id', 'member_id');
             $table->unique(
                 ['relation_id', 'member_type', 'member_id', 'member_role', 'sequence'],
-                'relation_members_uniqueness'
+                'relation_members-uniqueness'
             );
+            $table->index('relation_id', 'relation_members-relation_id');
+            $table->index('member_id', 'relation_members-member_id');
         });
 
 

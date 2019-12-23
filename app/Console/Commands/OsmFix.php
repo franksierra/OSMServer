@@ -13,7 +13,7 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\Storage;
 
-class OsmFixMissing extends Command
+class OsmFix extends Command
 {
     /**
      * The name and signature of the console command.
@@ -58,9 +58,11 @@ class OsmFixMissing extends Command
             ->orderBy('relation_id', 'ASC')->get();
         foreach ($territories as $territory) {
             $geometry = OSM::relationGeometry($territory->relation->id);
+            $this->output->progressStart(count($geometry->empty_ways));
             foreach ($geometry->empty_ways as $id => $nil) {
                 $data = $this->getWay($id);
                 $this->fixWay($data);
+                $this->output->progressAdvance(1);
             }
         }
 

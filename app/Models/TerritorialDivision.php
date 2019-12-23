@@ -4,8 +4,8 @@
 namespace App\Models;
 
 
-use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
 use Illuminate\Database\Eloquent\Model;
+use Phaza\LaravelPostgis\Eloquent\PostgisTrait;
 
 /**
  * App\Models\TerritorialDivision
@@ -28,13 +28,13 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TerritorialDivision doesTouch($geometryColumn, $geometry)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TerritorialDivision equals($geometryColumn, $geometry)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TerritorialDivision intersects($geometryColumn, $geometry)
- * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|\App\Models\TerritorialDivision newModelQuery()
- * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|\App\Models\TerritorialDivision newQuery()
+ * @method static \Phaza\LaravelPostgis\Eloquent\Builder|\App\Models\TerritorialDivision newModelQuery()
+ * @method static \Phaza\LaravelPostgis\Eloquent\Builder|\App\Models\TerritorialDivision newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TerritorialDivision orderByDistance($geometryColumn, $geometry, $direction = 'asc')
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TerritorialDivision orderByDistanceSphere($geometryColumn, $geometry, $direction = 'asc')
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TerritorialDivision orderBySpatial($geometryColumn, $geometry, $orderFunction, $direction = 'asc')
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TerritorialDivision overlaps($geometryColumn, $geometry)
- * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|\App\Models\TerritorialDivision query()
+ * @method static \Phaza\LaravelPostgis\Eloquent\Builder|\App\Models\TerritorialDivision query()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TerritorialDivision whereAdminLevel($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TerritorialDivision whereGeometry($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TerritorialDivision whereName($value)
@@ -45,7 +45,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class TerritorialDivision extends Model
 {
-    use SpatialTrait;
+    use PostgisTrait;
 
     public $incrementing = false;
     public $timestamps = false;
@@ -60,8 +60,14 @@ class TerritorialDivision extends Model
         'geometry'
     ];
 
-    protected $spatialFields = [
+    protected $postgisFields = [
         'geometry'
+    ];
+    protected $postgisTypes = [
+        'geometry' => [
+            'geomtype' => 'geometry',
+            'srid' => 4326
+        ],
     ];
 
 }

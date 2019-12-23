@@ -3,10 +3,9 @@
 
 namespace App\Geo;
 
-use Grimzy\LaravelMysqlSpatial\Types\LineString;
-use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Phaza\LaravelPostgis\Geometries\LineString;
+use Phaza\LaravelPostgis\Geometries\Point;
 
 class OSM
 {
@@ -74,9 +73,9 @@ class OSM
                 }
             }
             $linestring[] = new LineString($points);
-            $polygons[] = new \Grimzy\LaravelMysqlSpatial\Types\Polygon($linestring);
+            $polygons[] = new \Phaza\LaravelPostgis\Geometries\Polygon($linestring);
         }
-        return new \Grimzy\LaravelMysqlSpatial\Types\MultiPolygon($polygons);
+        return new \Phaza\LaravelPostgis\Geometries\MultiPolygon($polygons);
 
     }
 
@@ -137,14 +136,30 @@ class OSM
         }
         $columns = '(' . $table->getGrammar()->columnize(array_keys(reset($values))) . ')';
         $parameters = collect($values)->map(function ($record) use ($table) {
-            $record = array_map('addslashes', $record);
-            return '(' . $table->getGrammar()->quoteString($record) . ')';
+            $record = implode(', ', array_map(function ($item) {
+                return "E'" . addslashes($item) . "'";
+            }, $record));
+            return '(' . $record . ')';
         })->implode(', ');
-
-        $sql = $table->getGrammar()->compileInsertOrIgnore($table, []);
-        $sql = Str::replaceFirst('()', $columns, $sql);
-        $sql = Str::replaceFirst('()', $parameters, $sql);
-        return $sql . ';';
+        return "insert into {$table_name} {$columns} values {$parameters} on conflict do nothing ;";
     }
 
+    public static function convert($wkt_str)
+    {
+        $ret_arr = array();
+        $matches = array();
+        preg_match('/\)\s*,\s*\(/', $wkt_str, $matches);
+        if (empty($matches)) {
+            $polys = array(
+                trim($wkt_str)
+            );
+        } else {
+            $polys = explode($matches[0], trim($wkt_str));
+        }
+        foreach ($polys as $poly) {
+            $ret_arr[] = str_replace('(', '', str_replace(')', '', substr($poly, stripos($poly, '(') + 2, stripos($poly, ')') - 2)));
+        }
+        $ret_arr = str_replace(' ', ',', $ret_arr);
+        return $ret_arr;
+    }
 }

@@ -103,7 +103,7 @@ class OsmImport extends Command
         $import->replication_url = $file_header->getOsmosisReplicationBaseUrl();
         $import->save();
 
-        $this->outputfolder .= $import->id . " - " . $filename . "/";
+        $this->outputfolder .= $import->id . "-" . $filename . "/";
         Storage::disk('local')->deleteDirectory($this->outputfolder);
         Storage::disk('local')->makeDirectory($this->outputfolder);
 

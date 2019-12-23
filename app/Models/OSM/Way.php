@@ -10,6 +10,7 @@ namespace App\Models\OSM;
 
 
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 /**
  * App\Models\OSM\Way
@@ -34,9 +35,18 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Way whereVersion($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OSM\Way whereVisible($value)
  * @mixin \Eloquent
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\OSM\WayTag[] $tags
+ * @property-read int|null $tags_count
  */
 class Way extends Model
 {
+    use Searchable;
+
+    public function searchableAs()
+    {
+        return 'osm_streets';
+    }
+
     public $incrementing = false;
     public $timestamps = false;
 
@@ -51,7 +61,11 @@ class Way extends Model
 
     public function nodes()
     {
-        return $this->hasManyThrough(Node::class,WayNode::class);
+        return $this->hasManyThrough(Node::class, WayNode::class);
     }
 
+    public function tags()
+    {
+        return $this->hasMany(WayTag::class);
+    }
 }

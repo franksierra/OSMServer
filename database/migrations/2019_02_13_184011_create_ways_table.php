@@ -14,7 +14,6 @@ class CreateWaysTable extends Migration
     public function up()
     {
         Schema::create('ways', function (Blueprint $table) {
-            $table->engine = 'MyISAM';
             $table->unsignedBigInteger('id')->primary();
             $table->unsignedBigInteger('changeset_id');
             $table->boolean('visible');
@@ -25,26 +24,24 @@ class CreateWaysTable extends Migration
         });
 
         Schema::create('way_tags', function (Blueprint $table) {
-            $table->engine = 'MyISAM';
             $table->unsignedBigInteger('way_id')->nullable(false);
-            $table->string('k', 191);
+            $table->string('k');
             $table->string('v');
 
-            $table->index('way_id', 'way_id');
-            $table->index('k', 'k');
-            $table->unique(['way_id', 'k'], 'unique_way_id_k');
+            $table->unique(['way_id', 'k'], 'way_tags-unique_way_id_k');
+            $table->index('way_id', 'way_tags-way_id');
+            $table->index('k', 'way_tags-k');
         });
 
 
         Schema::create('way_nodes', function (Blueprint $table) {
-            $table->engine = 'MyISAM';
             $table->unsignedBigInteger('way_id');
             $table->unsignedBigInteger('node_id');
             $table->unsignedInteger('sequence');
 
-            $table->index('way_id', 'way_id');
-            $table->index('node_id', 'node_id');
-            $table->unique(['way_id', 'node_id', 'sequence'], 'way_nodes_uniqueness');
+            $table->unique(['way_id', 'node_id', 'sequence'], 'way_nodes-way_nodes_uniqueness');
+            $table->index('way_id', 'way_nodes-way_id');
+            $table->index('node_id', 'way_nodes-node_id');
         });
     }
 

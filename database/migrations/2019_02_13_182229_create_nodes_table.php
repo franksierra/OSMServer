@@ -14,7 +14,6 @@ class CreateNodesTable extends Migration
     public function up()
     {
         Schema::create('nodes', function (Blueprint $table) {
-            $table->engine = 'MyISAM';
             $table->unsignedBigInteger('id')->primary();
             $table->decimal('latitude', 13, 10);
             $table->decimal('longitude', 13, 10);
@@ -27,14 +26,13 @@ class CreateNodesTable extends Migration
         });
 
         Schema::create('node_tags', function (Blueprint $table) {
-            $table->engine = 'MyISAM';
             $table->unsignedBigInteger('node_id')->nullable(false);
-            $table->string('k', 191);
+            $table->string('k');
             $table->string('v');
 
-            $table->index('node_id', 'node_id');
-            $table->index('k', 'k');
-            $table->unique(['node_id', 'k'], 'unique_node_id_k');
+            $table->unique(['node_id', 'k'], 'node_tags-unique_node_id_k');
+            $table->index('node_id', 'node_tags-node_id');
+            $table->index('k', 'node_tags-k');
         });
     }
 

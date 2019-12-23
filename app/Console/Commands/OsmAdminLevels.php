@@ -7,9 +7,9 @@ use App\Geo\OSM;
 use App\Models\OSM\Relation;
 use App\Models\OSM\RelationTag;
 use App\Models\TerritorialDivision;
-use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Phaza\LaravelPostgis\Geometries\Point;
 
 class OsmAdminLevels extends Command
 {
@@ -44,60 +44,63 @@ class OsmAdminLevels extends Command
      */
     public function handle()
     {
-//        DB::table('territorial_divisions')->truncate();
-//        $territories = RelationTag::where('k', '=', 'admin_level')
-//            ->orderBy('relation_id', 'ASC')->get();
-//
-//        $this->output->progressStart(count($territories));
-//        foreach ($territories as $territory) {
-//            $level = $territory->v;
-//            $tags = $territory->relation->tags()->where('k', '=', 'name')->first();
-//            $name = $tags->v ?? '';
-//            $geometry = OSM::relationGeometry($territory->relation->id);
-//            if ($geometry != null && count($geometry->empty_ways) == 0 && count($geometry->polygons) > 0) {
-//                $multiPolygon = OSM::toSpatial($geometry);
-//                TerritorialDivision::create([
-//                    'relation_id' => $territory->relation->id,
-//                    'parent_relation_id' => '-1',
-//                    'name' => $name,
-//                    'admin_level' => $level,
-//                    'geometry' => $multiPolygon
-//                ]);
-//            }
-//            $this->output->progressAdvance(1);
-//        }
-//        $this->output->progressFinish();
-////        return true;
-//
-//        TerritorialDivision::where('admin_level', '=', 2)->update(['parent_relation_id' => 0]);
-//        $admin_levels = TerritorialDivision::groupBy('admin_level')
-//            ->orderBy('admin_level')
-//            ->get('admin_level')
-//            ->pluck('admin_level');
-//        $this->output->progressStart(TerritorialDivision::count('relation_id'));
-//        foreach ($admin_levels as $index => $admin_level) {
-//            $parent_zones = TerritorialDivision::where('admin_level', '=', $admin_level)->get('relation_id');
-//            foreach ($parent_zones as $parent_zone) {
-//                $child_zones = TerritorialDivision::whereRaw(
-//                    "ST_Within(geometry, (SELECT geometry FROM territorial_divisions WHERE relation_id = $parent_zone->relation_id))"
-//                )
-//                    ->where('admin_level', '>', $admin_level)
-//                    ->get('relation_id');
-//                foreach ($child_zones as $child_zone) {
-//                    $child_zone->parent_relation_id = $parent_zone->relation_id;
-//                    $child_zone->save();
-//                    $this->output->progressAdvance(1);
-//                }
-//            }
-//        }
-//        $this->output->progressFinish();
+        DB::table('territorial_divisions')->truncate();
+        $territories = RelationTag::where('k', '=', 'admin_level')
+            ->orderBy('relation_id', 'ASC')->get();
 
-        /// Dumps a list...
-        file_put_contents(
-            'text.txt',
-            "INSERT INTO divisiones_territoriales (id,id_division_territorial,id_osm,nombre,nivel,latitud,longitud,admin_level,id_usuario_creacion) VALUES\n"
+        $this->output->progressStart(count($territories));
+        foreach ($territories as $territory) {
+            $level = $territory->v;
+            $tags = $territory->relation->tags()->where('k', '=', 'name')->first();
+            $name = $tags->v ?? '';
+            $geometry = OSM::relationGeometry($territory->relation->id);
+            if ($geometry != null && count($geometry->empty_ways) == 0 && count($geometry->polygons) > 0) {
+                $multiPolygon = OSM::toSpatial($geometry);
+                TerritorialDivision::create([
+                    'relation_id' => $territory->relation->id,
+                    'parent_relation_id' => '-1',
+                    'name' => $name,
+                    'admin_level' => $level,
+                    'geometry' => $multiPolygon
+                ]);
+            }
+            $this->output->progressAdvance(1);
+        }
+        $this->output->progressFinish();
+
+        TerritorialDivision::where('admin_level', '=', 2)->update(
+            [
+                'parent_relation_id' => 0,
+            ]
         );
-        $this->pretyPrint();
+        $admin_levels = TerritorialDivision::groupBy('admin_level')
+            ->orderBy('admin_level')
+            ->get('admin_level')
+            ->pluck('admin_level');
+        $this->output->progressStart(TerritorialDivision::count('relation_id'));
+        foreach ($admin_levels as $index => $admin_level) {
+            $parent_zones = TerritorialDivision::where('admin_level', '=', $admin_level)->get('relation_id');
+            foreach ($parent_zones as $parent_zone) {
+                $child_zones = TerritorialDivision::whereRaw(
+                    "ST_Within(geometry, (SELECT geometry FROM territorial_divisions WHERE relation_id = $parent_zone->relation_id))"
+                )
+                    ->where('admin_level', '>', $admin_level)
+                    ->get('relation_id');
+                foreach ($child_zones as $child_zone) {
+                    $child_zone->parent_relation_id = $parent_zone->relation_id;
+                    $child_zone->save();
+                    $this->output->progressAdvance(1);
+                }
+            }
+        }
+        $this->output->progressFinish();
+
+//        /// Dumps a list...
+//        file_put_contents(
+//            'text.txt',
+//            "INSERT INTO divisiones_territoriales (id,id_division_territorial,id_osm,nombre,nivel,latitud,longitud,admin_level,id_usuario_creacion) VALUES\n"
+//        );
+//        $this->pretyPrint();
         return true;
     }
 

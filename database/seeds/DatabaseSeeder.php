@@ -5,7 +5,6 @@ use App\Models\AppKey;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -31,13 +30,5 @@ class DatabaseSeeder extends Seeder
             'active' => 1,
             'created_at' => Carbon::now()
         ]);
-
-        $nodes = factory(Node::class)->times(100)->create()
-            ->each(function (Node $node) {
-                $node->tags()->saveMany(
-                    factory(NodeTag::class, 10)->make()
-                );
-            });
-
     }
 }
